@@ -1,0 +1,8 @@
+<svg width="600" height="420" viewBox="0 0 600 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="420" rx="28" fill="#ECFCCB"/>
+  <circle cx="130" cy="110" r="70" fill="#fff" fill-opacity="0.7"/>
+  <circle cx="500" cy="326" r="78" fill="#fff" fill-opacity="0.45"/>
+  <text x="54" y="92" font-size="72">🌱</text>
+  <text x="54" y="182" font-size="42" fill="#365314" font-family="Arial, sans-serif" font-weight="700">Gardener</text>
+  <text x="54" y="228" font-size="24" fill="#365314" font-family="Arial, sans-serif">Outdoor and plant care</text>
+</svg>

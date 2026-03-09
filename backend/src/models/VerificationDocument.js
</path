@@ -1,0 +1,58 @@
+import mongoose from 'mongoose';
+
+const verificationDocumentSchema = new mongoose.Schema({
+  workerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Worker',
+    required: true
+  },
+  documentType: {
+    type: String,
+    enum: ['nin', 'government_id', 'face_match', 'passport', 'drivers_license'],
+    required: true
+  },
+  documentNumber: {
+    type: String,
+    default: null
+  },
+  documentUrl: {
+    type: String,
+    required: true
+  },
+  backDocumentUrl: {
+    type: String,
+    default: null
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  verifiedAt: {
+    type: Date,
+    default: null
+  },
+  verifiedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  rejectionReason: {
+    type: String,
+    default: null
+  },
+  notes: {
+    type: String,
+    default: null
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes
+verificationDocumentSchema.index({ workerId: 1 });
+verificationDocumentSchema.index({ documentType: 1 });
+verificationDocumentSchema.index({ verified: 1 });
+
+const VerificationDocument = mongoose.model('VerificationDocument', verificationDocumentSchema);
+
+export default VerificationDocument;
