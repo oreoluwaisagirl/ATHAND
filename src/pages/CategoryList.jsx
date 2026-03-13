@@ -8,11 +8,11 @@ import AppIcon from '../components/AppIcon';
 
 // Map category ID to display name
 const categoryNames = {
-  nanny: 'Nannies',
+  nanny: 'Salon',
   maid: 'House Maids',
   cook: 'Cooks',
-  driver: 'Drivers',
-  gardener: 'Gardeners',
+  driver: 'Home Move',
+  gardener: 'Painting',
   cleaner: 'Cleaners',
   tutor: 'Tutors',
   security: 'Security',

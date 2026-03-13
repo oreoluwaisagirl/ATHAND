@@ -7,6 +7,9 @@ import AppIcon from '../components/AppIcon';
 
 const serviceCategories = [
   { id: 'maid', label: 'House Helps', icon: 'home' },
+  { id: 'driver', label: 'Home Move', icon: 'truck' },
+  { id: 'nanny', label: 'Salon', icon: 'care' },
+  { id: 'gardener', label: 'Painting', icon: 'paint' },
   { id: 'mechanic', label: 'Mechanics', icon: 'wrench' },
   { id: 'electrician', label: 'Electricians', icon: 'electric' },
   { id: 'tutor', label: 'Tutors', icon: 'book' },

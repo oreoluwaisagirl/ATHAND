@@ -2,11 +2,11 @@
 
 // Categories with metadata
 export const categories = [
-  { id: 'nanny', name: 'Nanny', icon: 'care', avgRating: 4.7, providers: 23 },
+  { id: 'nanny', name: 'Salon', icon: 'care', avgRating: 4.7, providers: 23 },
   { id: 'maid', name: 'House Maid', icon: 'cleaning', avgRating: 4.8, providers: 45 },
   { id: 'cook', name: 'Cook', icon: 'chef', avgRating: 4.6, providers: 31 },
-  { id: 'driver', name: 'Driver', icon: 'car', avgRating: 4.9, providers: 18 },
-  { id: 'gardener', name: 'Gardener', icon: 'leaf', avgRating: 4.5, providers: 12 },
+  { id: 'driver', name: 'Home Move', icon: 'truck', avgRating: 4.9, providers: 18 },
+  { id: 'gardener', name: 'Painting', icon: 'paint', avgRating: 4.5, providers: 12 },
   { id: 'cleaner', name: 'Cleaner', icon: 'cleaning', avgRating: 4.7, providers: 120 },
   { id: 'tutor', name: 'Tutor', icon: 'book', avgRating: 4.8, providers: 85 },
   { id: 'security', name: 'Security', icon: 'shield', avgRating: 4.6, providers: 65 },

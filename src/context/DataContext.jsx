@@ -16,11 +16,11 @@ export const useData = () => {
 const isMongoObjectId = (value) => typeof value === 'string' && /^[a-fA-F0-9]{24}$/.test(value);
 
 const baseCategories = [
-  { id: 'nanny', name: 'Nanny', icon: 'care' },
+  { id: 'nanny', name: 'Salon', icon: 'care' },
   { id: 'maid', name: 'House Maid', icon: 'cleaning' },
   { id: 'cook', name: 'Cook', icon: 'chef' },
-  { id: 'driver', name: 'Driver', icon: 'car' },
-  { id: 'gardener', name: 'Gardener', icon: 'leaf' },
+  { id: 'driver', name: 'Home Move', icon: 'truck' },
+  { id: 'gardener', name: 'Painting', icon: 'paint' },
   { id: 'cleaner', name: 'Cleaner', icon: 'cleaning' },
   { id: 'tutor', name: 'Tutor', icon: 'book' },
   { id: 'security', name: 'Security', icon: 'shield' },
