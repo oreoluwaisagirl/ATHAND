@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
+import AppIcon from '../components/AppIcon';
 
 const PaymentMethods = () => {
   const navigate = useNavigate();
@@ -68,7 +69,9 @@ const PaymentMethods = () => {
           </div>
           <div className="bg-container p-4 rounded-lg border border-border cursor-pointer hover:shadow-md">
             <div className="flex items-center space-x-3">
-              <span className="text-2xl">📱</span>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-background text-text-primary">
+                <AppIcon name="card" className="h-5 w-5" />
+              </span>
               <div>
                 <h3 className="font-semibold text-text-primary">Mobile Money</h3>
                 <p className="text-sm text-text-secondary">Pay using mobile money services</p>
@@ -82,4 +85,3 @@ const PaymentMethods = () => {
 };
 
 export default PaymentMethods;
-

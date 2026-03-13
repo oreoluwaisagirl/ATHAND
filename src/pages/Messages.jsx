@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { Card, CardContent } from '../components/Card';
+import AppIcon from '../components/AppIcon';
 import { useData } from '../context/DataContext';
 import { resolveAvatar } from '../lib/avatars';
 
@@ -52,7 +53,7 @@ const Messages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 md:pb-10">
       <div className="bg-container shadow-sm px-4 py-3 flex items-center justify-between border-b border-border">
         <h1 className="text-xl font-semibold text-text-primary">Messages</h1>
         <div className="flex space-x-2">
@@ -115,7 +116,9 @@ const Messages = () => {
           ))
         ) : (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">💬</div>
+            <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full bg-background text-text-primary">
+              <AppIcon name="chat" className="h-10 w-10" />
+            </div>
             <h3 className="text-lg font-semibold text-text-primary mb-2">No conversations yet</h3>
             <p className="text-text-secondary mb-4">Start a conversation from any provider profile.</p>
             <Button onClick={() => navigate('/house-help-search')}>Browse Providers</Button>

@@ -229,7 +229,7 @@ const BookingDateTime = () => {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:static md:mt-6 md:mx-auto md:max-w-3xl md:rounded-lg md:border">
         <div className="flex space-x-3">
           <Button
             variant="outline"

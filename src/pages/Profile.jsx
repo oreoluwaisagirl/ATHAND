@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { Card, CardContent } from '../components/Card';
+import AppIcon from '../components/AppIcon';
 import { resolveAvatar } from '../lib/avatars';
 
 const Profile = () => {
@@ -44,7 +45,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 md:pb-10">
       <div className="bg-container shadow-sm px-4 py-3 flex items-center justify-between border-b border-border">
         <h1 className="text-xl font-semibold text-text-primary">Profile</h1>
         <button onClick={() => navigate('/notification-settings')} className="text-text-secondary hover:text-text-primary">⚙️</button>
@@ -81,7 +82,11 @@ const Profile = () => {
         ) : (
           <div className="space-y-3">
             {recentBookings.map((booking, idx) => (
-              <Card key={booking.id || booking._id || idx} className="cursor-pointer hover:shadow-lg transition-shadow">
+              <Card
+                key={booking.id || booking._id || idx}
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/booking-tracking/${booking.id || booking._id}`)}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -117,9 +122,9 @@ const Profile = () => {
       </div>
 
       <div className="px-4 py-6 border-t border-border space-y-3">
-        <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/payment-methods')}>💳 Payment Methods</Button>
-        <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/notification-settings')}>🔔 Notification Settings</Button>
-        <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/help-center')}>❓ Help Center</Button>
+        <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/payment-methods')}><AppIcon name="card" className="h-4 w-4" />Payment Methods</Button>
+        <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/notification-settings')}><AppIcon name="bell" className="h-4 w-4" />Notification Settings</Button>
+        <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/help-center')}><AppIcon name="question" className="h-4 w-4" />Help Center</Button>
       </div>
 
       <div className="px-4 pb-8">

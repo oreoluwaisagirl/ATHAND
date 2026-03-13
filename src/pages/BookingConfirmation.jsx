@@ -98,7 +98,7 @@ const BookingConfirmation = () => {
         </Card>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-container border-t border-border p-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-container border-t border-border p-4 md:static md:mt-6 md:mx-auto md:max-w-3xl md:rounded-lg md:border">
         <div className="flex space-x-3">
           <Button variant="outline" onClick={() => navigate('/booking-location')} className="flex-1">Back</Button>
           <Button onClick={handleConfirmBooking} className="flex-1" disabled={!agreeToTerms}>Confirm Booking</Button>

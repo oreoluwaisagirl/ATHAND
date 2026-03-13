@@ -27,8 +27,11 @@ import AdminPanel from './pages/AdminPanel';
 import OtpDebug from './pages/OtpDebug';
 import WorkerPanel from './pages/WorkerPanel';
 import WorkerOnboarding from './pages/WorkerOnboarding';
+import EmergencyHelp from './pages/EmergencyHelp';
+import BookingScreen from './pages/BookingScreen';
+import BookingTracking from './pages/BookingTracking';
 import BottomNavigation from './components/BottomNavigation';
-import DarkModeToggle from './components/DarkModeToggle';
+import DesktopHeader from './components/DesktopHeader';
 import CommandCenter from './components/CommandCenter';
 import './App.css';
 
@@ -39,21 +42,21 @@ function App() {
         <DataProvider>
           <Router>
             <div className="min-h-screen bg-background transition-colors duration-300">
-              {/* Dark Mode Toggle - Fixed Position */}
-              <div className="fixed top-4 right-4 z-50">
-                <DarkModeToggle />
-              </div>
+              <DesktopHeader />
               
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/house-help-search" element={<HouseHelpSearch />} />
                 <Route path="/other-help" element={<OtherHelpHub />} />
+                <Route path="/emergency-help" element={<EmergencyHelp />} />
                 <Route path="/category/:categoryId" element={<CategoryList />} />
                 <Route path="/worker/:categoryId/:workerId" element={<WorkerProfile />} />
                 <Route path="/booking-summary" element={<BookingSummary />} />
+                <Route path="/booking" element={<BookingScreen />} />
                 <Route path="/booking-datetime" element={<BookingDateTime />} />
                 <Route path="/booking-location" element={<BookingLocation />} />
                 <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+                <Route path="/booking-tracking/:bookingId" element={<BookingTracking />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/chat/:conversationId" element={<Chat />} />
                 <Route path="/profile" element={<Profile />} />

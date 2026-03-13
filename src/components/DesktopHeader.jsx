@@ -1,0 +1,60 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import DarkModeToggle from './DarkModeToggle';
+
+const links = [
+  { to: '/', label: 'Home' },
+  { to: '/about-athand', label: 'About' },
+  { to: '/house-help-search', label: 'Service List' },
+  { to: '/worker-panel', label: 'Dashboard' },
+  { to: '/other-help', label: 'Others' },
+  { to: '/messages', label: 'Blog' },
+  { to: '/profile', label: 'Contact' },
+];
+
+const DesktopHeader = () => {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  return (
+    <header className={`sticky top-0 z-40 hidden md:block ${isHome ? 'border-b border-white/10 bg-[#120d0b]/80' : 'border-b border-border bg-container/92'} backdrop-blur-xl`}>
+      <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6 lg:px-10">
+        <Link to="/" className="flex items-center gap-3">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border-4 border-emerald-500 bg-transparent text-base font-bold text-emerald-400">
+            Q
+          </span>
+          <div>
+            <p className={`text-xl font-black uppercase tracking-[0.12em] ${isHome ? 'text-white' : 'text-text-primary'}`}>ATHAND</p>
+          </div>
+        </Link>
+        <div className="flex items-center gap-5">
+          <nav className="flex items-center gap-7">
+            {links.map((item) => {
+              const active = location.pathname === item.to;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`text-sm transition ${active ? (isHome ? 'font-semibold text-white' : 'font-semibold text-primary') : (isHome ? 'text-white/75 hover:text-white' : 'text-text-secondary hover:text-text-primary')}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <div className={`flex items-center gap-3 ${isHome ? 'text-white' : 'text-text-primary'}`}>
+            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${isHome ? 'border-primary/40 bg-primary/20 text-primary' : 'border-border bg-background'}`}>
+              <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+            </span>
+            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full border-2 ${isHome ? 'border-orange-300 bg-orange-100 text-slate-900' : 'border-border bg-background text-text-primary'}`}>
+              A
+            </span>
+          </div>
+          <DarkModeToggle className={isHome ? '!border-white/15 !bg-white/5 !text-white hover:!bg-white/10' : '!bg-background !text-text-secondary hover:!bg-background-secondary'} />
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default DesktopHeader;

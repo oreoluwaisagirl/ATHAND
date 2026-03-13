@@ -1,216 +1,82 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
-import { Card, CardContent, CardHeader } from '../components/Card';
+import AppIcon from '../components/AppIcon';
+import GoogleLiveMap from '../components/GoogleLiveMap';
+
+const cityOptions = [
+  { id: 'new-york', label: 'New York,\nNew York', active: true, center: { lat: 40.7128, lng: -74.006 } },
+  { id: 'los-angeles', label: 'Los Angeles,\nCalifornia', center: { lat: 34.0522, lng: -118.2437 } },
+  { id: 'chicago', label: 'Chicago,\nNew York', center: { lat: 41.8781, lng: -87.6298 } },
+  { id: 'houston', label: 'Houston,\nTexas', center: { lat: 29.7604, lng: -95.3698 } },
+  { id: 'phoenix', label: 'Phoenix,\nArizona', center: { lat: 33.4484, lng: -112.074 } },
+];
+
+const steps = ['Location', 'Service', 'Date & Time', 'Information', 'Confirmation'];
 
 const BookingLocation = () => {
   const navigate = useNavigate();
-  const [address, setAddress] = useState('');
-  const [apartment, setApartment] = useState('');
-  const [landmark, setLandmark] = useState('');
-  const [phone, setPhone] = useState('');
+  const [selectedCity, setSelectedCity] = useState('new-york');
 
-  const savedAddresses = [
-    { id: 1, name: 'Home', address: '24 Admiralty Way, Lekki, Lagos' },
-    { id: 2, name: 'Office', address: '12 Ozumba Mbadiwe, Victoria Island, Lagos' }
-  ];
+  const currentCity = useMemo(
+    () => cityOptions.find((city) => city.id === selectedCity) || cityOptions[0],
+    [selectedCity]
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation */}
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => navigate('/booking-datetime')}
-          className="text-gray-600 hover:text-gray-900"
-        >
-          ←
-        </button>
-        <h1 className="text-xl font-semibold">Location</h1>
-        <div className="w-8"></div>
-      </div>
-
-      {/* Progress Indicator */}
-      <div className="bg-white px-4 py-2 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
-          <div className="flex-1 h-1 bg-gray-200 rounded">
-            <div className="w-3/4 h-1 bg-primary rounded"></div>
-          </div>
-          <span className="text-sm text-gray-600">Step 3 of 4</span>
+    <div className="min-h-screen bg-[#f8f8f8] px-4 py-10 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-6xl">
+        <div className="flex flex-wrap items-center gap-4 py-4 text-xl font-semibold text-text-secondary">
+          {steps.map((step, index) => (
+            <React.Fragment key={step}>
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex h-11 w-11 items-center justify-center rounded-full border-2 text-lg ${index === 0 ? 'border-primary text-primary' : 'border-[#d9d9d9] bg-[#ececec] text-[#9a9a9a]'}`}>
+                  {index + 1}
+                </span>
+                <span className={index === 0 ? 'text-text-primary' : 'text-[#9a9a9a]'}>{step}</span>
+              </div>
+              {index < steps.length - 1 ? <AppIcon name="arrowRight" className="h-5 w-5 text-[#a7a7a7]" /> : null}
+            </React.Fragment>
+          ))}
         </div>
-      </div>
 
-      <div className="px-4 py-6 space-y-6">
-        {/* Location Input Section */}
-        <Card>
-          <CardHeader>
-            <h3 className="font-semibold">Service Location</h3>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Saved Addresses */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Saved Addresses</h4>
-              <div className="space-y-2">
-                {savedAddresses.map((savedAddr) => (
-                  <button
-                    key={savedAddr.id}
-                    onClick={() => setAddress(savedAddr.address)}
-                    className={`w-full p-3 border rounded-lg text-left ${
-                      address === savedAddr.address
-                        ? 'border-primary bg-primary bg-opacity-10'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <div className="font-medium">{savedAddr.name}</div>
-                    <div className="text-sm text-gray-600">{savedAddr.address}</div>
-                  </button>
-                ))}
-                <button className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-gray-400">
-                  + Add New Address
-                </button>
-              </div>
-            </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-5">
+          {cityOptions.map((city) => (
+            <button
+              key={city.id}
+              onClick={() => setSelectedCity(city.id)}
+              className={`min-h-[168px] rounded-[0.9rem] px-6 py-8 text-left text-[2rem] font-semibold leading-[1.3] tracking-[-0.03em] shadow-sm transition ${
+                selectedCity === city.id
+                  ? 'bg-primary text-white'
+                  : 'bg-[#eef1f7] text-text-primary hover:bg-[#e6ebf5]'
+              }`}
+            >
+              {city.label.split('\n').map((line) => (
+                <span key={line} className="block">{line}</span>
+              ))}
+            </button>
+          ))}
+        </div>
 
-            {/* Address Details */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street Address *
-              </label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Enter your street address"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+        <div className="mx-auto mt-20 max-w-5xl overflow-hidden rounded-[0.95rem] bg-white shadow-[0_16px_35px_rgba(39,55,86,0.08)]">
+          <div className="flex items-center justify-center gap-3 bg-primary px-4 py-4 text-2xl font-semibold text-white">
+            <AppIcon name="pin" className="h-5 w-5" />
+            Select Current Location
+          </div>
+          <GoogleLiveMap
+            center={currentCity.center}
+            height={430}
+            className="rounded-none border-0"
+            markers={[{ ...currentCity.center, label: currentCity.label.replace('\n', ', ') }]}
+          />
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Apartment/Suite/Building (Optional)
-              </label>
-              <input
-                type="text"
-                value={apartment}
-                onChange={(e) => setApartment(e.target.value)}
-                placeholder="e.g., Apartment 5B, Lekki Gardens"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Landmark
-              </label>
-              <input
-                type="text"
-                value={landmark}
-                onChange={(e) => setLandmark(e.target.value)}
-                placeholder="Nearby landmark for easier navigation"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contact Phone Number
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Enter phone number for service day"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Map Display Placeholder */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="bg-gray-200 h-48 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-4xl mb-2">🗺️</div>
-                <p className="text-gray-600">Interactive Map</p>
-                <p className="text-sm text-gray-500">Map integration coming soon</p>
-              </div>
-            </div>
-            <div className="mt-3 text-center">
-              <Button variant="outline" size="sm">
-                Adjust Pin
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Service Fee Notice */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <div className="text-blue-600 text-xl">ℹ️</div>
-              <div>
-                <h4 className="font-semibold text-blue-900 mb-1">Service Fee Adjustment</h4>
-                <p className="text-sm text-blue-800">
-                  Service fee may vary based on distance. Final price will be shown on the next screen.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Booking Summary Preview */}
-        <Card>
-          <CardHeader>
-            <h3 className="font-semibold">Booking Summary</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Provider</span>
-                <span>Adebayo Johnson</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Date</span>
-                <span>Not selected</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Time</span>
-                <span>Not selected</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Duration</span>
-                <span>8 hours</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Location</span>
-                <span className="text-right max-w-40 truncate">{address || 'Not specified'}</span>
-              </div>
-              <div className="flex justify-between font-semibold">
-                <span>Estimated Total</span>
-                <span>₦22,000</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="flex space-x-3">
+        <div className="mt-10 flex justify-end">
           <Button
-            variant="outline"
-            onClick={() => navigate('/booking-datetime')}
-            className="flex-1"
-          >
-            Back
-          </Button>
-          <Button
+            className="rounded-none px-10 py-4 text-lg font-semibold"
             onClick={() => navigate('/booking-confirmation')}
-            className="flex-1"
-            disabled={!address}
           >
-            Continue to Confirmation
+            Next
           </Button>
         </div>
       </div>

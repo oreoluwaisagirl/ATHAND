@@ -2,19 +2,19 @@
 
 // Categories with metadata
 export const categories = [
-  { id: 'nanny', name: 'Nanny', icon: '👶', avgRating: 4.7, providers: 23 },
-  { id: 'maid', name: 'House Maid', icon: '🧹', avgRating: 4.8, providers: 45 },
-  { id: 'cook', name: 'Cook', icon: '🍳', avgRating: 4.6, providers: 31 },
-  { id: 'driver', name: 'Driver', icon: '🚗', avgRating: 4.9, providers: 18 },
-  { id: 'gardener', name: 'Gardener', icon: '🌱', avgRating: 4.5, providers: 12 },
-  { id: 'cleaner', name: 'Cleaner', icon: '🧽', avgRating: 4.7, providers: 120 },
-  { id: 'tutor', name: 'Tutor', icon: '📚', avgRating: 4.8, providers: 85 },
-  { id: 'security', name: 'Security', icon: '🛡️', avgRating: 4.6, providers: 65 },
-  { id: 'engineer', name: 'Engineer', icon: '⚙️', avgRating: 4.9, providers: 55 },
-  { id: 'mechanic', name: 'Mechanic', icon: '🔧', avgRating: 4.7, providers: 70 },
-  { id: 'carpenter', name: 'Carpenter', icon: '🔨', avgRating: 4.8, providers: 50 },
-  { id: 'plumber', name: 'Plumber', icon: '🔩', avgRating: 4.6, providers: 45 },
-  { id: 'electrician', name: 'Electrician', icon: '💡', avgRating: 4.8, providers: 60 },
+  { id: 'nanny', name: 'Nanny', icon: 'care', avgRating: 4.7, providers: 23 },
+  { id: 'maid', name: 'House Maid', icon: 'cleaning', avgRating: 4.8, providers: 45 },
+  { id: 'cook', name: 'Cook', icon: 'chef', avgRating: 4.6, providers: 31 },
+  { id: 'driver', name: 'Driver', icon: 'car', avgRating: 4.9, providers: 18 },
+  { id: 'gardener', name: 'Gardener', icon: 'leaf', avgRating: 4.5, providers: 12 },
+  { id: 'cleaner', name: 'Cleaner', icon: 'cleaning', avgRating: 4.7, providers: 120 },
+  { id: 'tutor', name: 'Tutor', icon: 'book', avgRating: 4.8, providers: 85 },
+  { id: 'security', name: 'Security', icon: 'shield', avgRating: 4.6, providers: 65 },
+  { id: 'engineer', name: 'Engineer', icon: 'gear', avgRating: 4.9, providers: 55 },
+  { id: 'mechanic', name: 'Mechanic', icon: 'wrench', avgRating: 4.7, providers: 70 },
+  { id: 'carpenter', name: 'Carpenter', icon: 'hammer', avgRating: 4.8, providers: 50 },
+  { id: 'plumber', name: 'Plumber', icon: 'pipe', avgRating: 4.6, providers: 45 },
+  { id: 'electrician', name: 'Electrician', icon: 'electric', avgRating: 4.8, providers: 60 },
 ];
 
 // Worker profiles organized by category
@@ -1025,4 +1025,3 @@ export const locations = [
   'Abuja - Wuse',
   'Port Harcourt',
 ];
-

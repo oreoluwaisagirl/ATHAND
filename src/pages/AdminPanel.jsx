@@ -6,6 +6,7 @@ import { adminApi } from '../lib/dataApi';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { Card, CardContent } from '../components/Card';
+import AppIcon from '../components/AppIcon';
 import { resolveAvatar } from '../lib/avatars';
 
 const AdminPanel = () => {
@@ -214,7 +215,9 @@ const AdminPanel = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-text-primary mb-4">🔒</h1>
+          <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-background text-text-primary">
+            <AppIcon name="lock" className="h-8 w-8" />
+          </div>
           <h2 className="text-xl font-semibold text-text-primary mb-2">Access Denied</h2>
           <p className="text-text-secondary mb-6">You do not have permission to access this page.</p>
           <Button onClick={() => navigate('/')}>Go Home</Button>
@@ -319,7 +322,7 @@ const AdminPanel = () => {
             >
               <option value="all">All Categories</option>
               {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           </div>
@@ -370,7 +373,7 @@ const AdminPanel = () => {
                   className="w-full px-3 py-2 border border-border rounded-lg bg-background text-text-primary"
                 >
                   {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
                 <input
@@ -508,19 +511,19 @@ const AdminPanel = () => {
                           <div>
                           <h4 className="font-semibold text-text-primary">{worker.name}</h4>
                           <p className="text-sm text-text-secondary">
-                            {categories.find(c => c.id === worker.categoryId)?.icon} {categories.find(c => c.id === worker.categoryId)?.name} • {worker.location}
+                            {categories.find(c => c.id === worker.categoryId)?.name} • {worker.location}
                           </p>
                           </div>
                         </div>
                         <Badge variant={worker.verified ? 'success' : 'warning'} size="sm">
-                          {worker.verified ? '✓ Verified' : 'Pending'}
+                          {worker.verified ? 'Verified' : 'Pending'}
                         </Badge>
                       </div>
                       <div className="text-sm text-text-tertiary mb-2 space-y-1">
-                        <p>📱 Phone: {worker.phoneNumber || 'Not set'}</p>
-                        <p>🏠 Address: {worker.homeAddress || 'Not set'}</p>
-                        <p>📍 {worker.availability}</p>
-                        <p>💰 ₦{worker.rate}/hr</p>
+                        <p>Phone: {worker.phoneNumber || 'Not set'}</p>
+                        <p>Address: {worker.homeAddress || 'Not set'}</p>
+                        <p>Status: {worker.availability}</p>
+                        <p>Rate: ₦{worker.rate}/hr</p>
                       </div>
                       <div className="flex space-x-2 mt-3">
                         <Button 

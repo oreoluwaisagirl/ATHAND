@@ -21,6 +21,11 @@ export const workersApi = {
     const query = new URLSearchParams(params).toString();
     return apiRequest(`/workers/${workerId}/bookings${query ? `?${query}` : ''}`);
   },
+  emergencyCategories: () => apiRequest('/workers/emergency/categories'),
+  emergencyNearby: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/workers/emergency/nearby${query ? `?${query}` : ''}`);
+  },
 };
 
 export const adminApi = {
@@ -39,4 +44,16 @@ export const adminApi = {
 
 export const bookingsApi = {
   myBookings: () => apiRequest('/bookings/my-bookings'),
+  create: (payload) => apiRequest('/bookings', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }),
+  updateStatus: (bookingId, payload) => apiRequest(`/bookings/${bookingId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  }),
+  updateEmergencyStatus: (bookingId, payload) => apiRequest(`/bookings/${bookingId}/emergency-status`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  }),
 };

@@ -38,12 +38,22 @@ const bookingSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'in_progress', 'completed', 'cancelled', 'rejected'],
+    enum: ['pending', 'confirmed', 'in_progress', 'awaiting_confirmation', 'completed', 'cancelled', 'rejected'],
     default: 'pending'
   },
   emergency: {
     type: Boolean,
     default: false
+  },
+  emergencyType: {
+    type: String,
+    enum: ['mechanic', 'plumber', 'electrician', 'generator_repair', null],
+    default: null
+  },
+  emergencyStatus: {
+    type: String,
+    enum: ['requested', 'assigned', 'en_route', 'arrived', 'in_progress', 'awaiting_confirmation', 'completed', 'cancelled', null],
+    default: null
   },
   notes: {
     type: String,
@@ -74,6 +84,10 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  customerConfirmedAt: {
+    type: Date,
+    default: null
+  },
   startedAt: {
     type: Date,
     default: null
@@ -85,7 +99,8 @@ const bookingSchema = new mongoose.Schema({
   // Payment fields
   paymentStatus: {
     type: String,
-    enum: ['pending', 'paid', 'failed', 'refunded'],
+    // `paid` retained for backward compatibility with existing records.
+    enum: ['pending', 'paid', 'held', 'released', 'failed', 'refunded'],
     default: 'pending'
   },
   paymentReference: {
@@ -97,6 +112,10 @@ const bookingSchema = new mongoose.Schema({
     default: null
   },
   paidAt: {
+    type: Date,
+    default: null
+  },
+  escrowHeldAt: {
     type: Date,
     default: null
   },
@@ -116,6 +135,10 @@ const bookingSchema = new mongoose.Schema({
   workerPayoutAmount: {
     type: Number,
     default: null
+  },
+  commissionRate: {
+    type: Number,
+    default: 0.2
   }
 }, {
   timestamps: true
@@ -133,7 +156,7 @@ bookingSchema.index({ createdAt: -1 });
 // Calculate price before saving
 bookingSchema.pre('save', function(next) {
   if (this.isModified('price') && this.price) {
-    this.platformFee = Math.round(this.price * 0.1 * 100) / 100;
+    this.platformFee = Math.round(this.price * (this.commissionRate || 0.2) * 100) / 100;
     this.workerEarnings = this.price - this.platformFee;
   }
   next();

@@ -39,6 +39,14 @@ const workerSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  latitude: {
+    type: Number,
+    default: null
+  },
+  longitude: {
+    type: Number,
+    default: null
+  },
   availability: {
     type: Map,
     of: {
@@ -209,6 +217,7 @@ workerSchema.index({ isFeatured: -1 });
 workerSchema.index({ isAvailable: 1 });
 workerSchema.index({ serviceArea: 1 });
 workerSchema.index({ emergencyServices: 1 });
+workerSchema.index({ latitude: 1, longitude: 1 });
 
 // Trust Score Weights
 const TRUST_WEIGHTS = {

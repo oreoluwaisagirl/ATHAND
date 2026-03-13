@@ -32,8 +32,8 @@ router.post('/initialize', authenticate, async (req, res, next) => {
     }
     
     // Check if already paid
-    if (booking.paymentStatus === 'paid') {
-      throw new AppError('Booking is already paid', 400);
+    if (['paid', 'held', 'released'].includes(booking.paymentStatus)) {
+      throw new AppError('Booking is already funded', 400);
     }
     
     const user = await User.findById(req.user._id);
@@ -80,10 +80,11 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       if (metadata?.type === 'booking_payment') {
         const booking = await Booking.findById(metadata.bookingId);
         
-        if (booking && booking.paymentStatus !== 'paid') {
-          booking.paymentStatus = 'paid';
+        if (booking && !['paid', 'held', 'released'].includes(booking.paymentStatus)) {
+          booking.paymentStatus = 'held';
           booking.paymentAmount = amount / 100; // Convert from kobo
           booking.paidAt = new Date();
+          booking.escrowHeldAt = new Date();
           await booking.save();
           
           // Notify user
@@ -91,7 +92,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             userId: metadata.userId,
             type: 'payment',
             title: 'Payment Successful',
-            message: `Your payment of ₦${booking.paymentAmount} has been confirmed`,
+            message: `Your payment of ₦${booking.paymentAmount} is now held in escrow`,
             data: { bookingId: booking._id }
           });
         }
@@ -107,6 +108,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       if (booking) {
         booking.workerPaid = true;
         booking.workerPaidAt = new Date();
+        booking.paymentStatus = 'released';
         await booking.save();
       }
     }
@@ -137,7 +139,9 @@ router.get('/verify/:reference', authenticate, async (req, res, next) => {
     res.json({
       success: true,
       paymentStatus: booking.paymentStatus,
-      verified: response.data.status === 'success'
+      verified: response.data.status === 'success',
+      escrowHeld: ['held', 'paid'].includes(booking.paymentStatus),
+      released: booking.paymentStatus === 'released'
     });
   } catch (error) {
     next(error);
@@ -179,8 +183,8 @@ router.post('/worker/bank-details', authenticate, async (req, res, next) => {
   }
 });
 
-// Pay worker after service completion
-router.post('/pay-worker', authenticate, async (req, res, next) => {
+// Release escrow to worker after customer confirmation
+router.post(['/release-escrow', '/pay-worker'], authenticate, async (req, res, next) => {
   try {
     const { bookingId } = req.body;
     
@@ -191,18 +195,23 @@ router.post('/pay-worker', authenticate, async (req, res, next) => {
       throw new AppError('Booking not found', 404);
     }
     
-    // Only admin can initiate worker payment
-    if (req.user.role !== 'admin') {
-      throw new AppError('Access denied', 403);
+    const isCustomer = booking.userId.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!isCustomer && !isAdmin) {
+      throw new AppError('Only customer or admin can release escrow', 403);
     }
     
-    // Verify booking is completed and paid
+    // Verify booking lifecycle conditions
     if (booking.status !== 'completed') {
-      throw new AppError('Booking must be completed first', 400);
+      throw new AppError('Customer confirmation is required before release', 400);
     }
     
-    if (booking.paymentStatus !== 'paid') {
-      throw new AppError('Booking must be paid first', 400);
+    if (!booking.customerConfirmedAt) {
+      throw new AppError('Customer has not confirmed completion yet', 400);
+    }
+
+    if (!['held', 'paid'].includes(booking.paymentStatus)) {
+      throw new AppError('Payment is not currently held in escrow', 400);
     }
     
     if (booking.workerPaid) {
@@ -215,9 +224,11 @@ router.post('/pay-worker', authenticate, async (req, res, next) => {
       throw new AppError('Worker has not added bank details', 400);
     }
     
-    // Calculate worker payout (after platform fee)
-    const platformFee = booking.price * 0.15; // 15% platform fee
-    const workerPayout = booking.price - platformFee;
+    // Calculate worker payout using booking commission settings.
+    const gross = booking.paymentAmount || booking.price;
+    const commissionRate = booking.commissionRate || 0.2;
+    const platformFee = Math.round(gross * commissionRate * 100) / 100;
+    const workerPayout = Math.round((gross - platformFee) * 100) / 100;
     
     const reference = generateReference();
     
@@ -230,6 +241,10 @@ router.post('/pay-worker', authenticate, async (req, res, next) => {
     booking.workerPayoutReference = reference;
     booking.platformFee = platformFee;
     booking.workerPayoutAmount = workerPayout;
+    booking.workerEarnings = workerPayout;
+    booking.paymentStatus = 'released';
+    booking.workerPaid = true;
+    booking.workerPaidAt = new Date();
     await booking.save();
     
     // Notify worker
@@ -243,9 +258,10 @@ router.post('/pay-worker', authenticate, async (req, res, next) => {
     
     res.json({
       success: true,
-      message: 'Payment initiated successfully',
+      message: 'Escrow released successfully',
       transferReference: reference,
-      amount: workerPayout
+      amount: workerPayout,
+      commission: platformFee
     });
   } catch (error) {
     next(error);
@@ -259,7 +275,7 @@ router.get('/history', authenticate, async (req, res, next) => {
     
     const bookings = await Booking.find({ 
       userId: req.user._id,
-      paymentStatus: 'paid'
+      paymentStatus: { $in: ['paid', 'held', 'released'] }
     })
     .populate('serviceId', 'name')
     .populate('workerId', 'profilePhotoUrl')
@@ -269,7 +285,7 @@ router.get('/history', authenticate, async (req, res, next) => {
     
     const total = await Booking.countDocuments({ 
       userId: req.user._id,
-      paymentStatus: 'paid'
+      paymentStatus: { $in: ['paid', 'held', 'released'] }
     });
     
     res.json({

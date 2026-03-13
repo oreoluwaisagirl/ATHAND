@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { Card, CardContent } from '../components/Card';
+import AppIcon from '../components/AppIcon';
 
 // Map category ID to display name
 const categoryNames = {
@@ -133,7 +134,7 @@ const CategoryList = () => {
           onClick={() => navigate('/notification-settings')}
           className="text-text-secondary hover:text-text-primary"
         >
-          🔔
+          <AppIcon name="bell" className="h-5 w-5" />
         </button>
       </div>
 
@@ -237,23 +238,19 @@ const CategoryList = () => {
                 />
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-text-primary">{provider.name}</h3>
+                    <h3 className="font-semibold text-text-primary">{provider.name} - Professional {categoryNames[categoryId]?.slice(0, -1) || 'Worker'}</h3>
                     <div className="flex space-x-1">
                       {provider.verified && <Badge variant="success" size="xs">NIN Verified</Badge>}
                       <Badge variant="primary" size="xs">ID Verified</Badge>
                     </div>
                   </div>
                   <p className="text-sm text-text-secondary mb-1">{provider.location}</p>
-                  <div className="flex items-center mb-2">
-                    <div className="flex text-amber mr-1">
-                      {'★'.repeat(Math.floor(provider.rating))}
-                    </div>
-                    <span className="text-sm text-text-secondary">{provider.rating} ({provider.reviews} reviews)</span>
-                  </div>
+                  <p className="mb-2 flex items-center gap-1 text-sm text-text-secondary"><AppIcon name="star" className="h-4 w-4 text-orange-500" />{provider.rating} | {provider.completedJobs || 0} Jobs</p>
+                  <p className="mb-2 inline-flex items-center gap-1 text-sm text-text-tertiary"><AppIcon name="pin" className="h-4 w-4" />{typeof provider.distanceKm === 'number' ? `${provider.distanceKm}km away` : 'Distance unavailable'}</p>
                   <p className="text-sm text-text-secondary mb-2">{provider.bio}</p>
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-lg font-bold text-text-primary">₦{provider.rate.toLocaleString()}/hr</span>
+                      <span className="text-lg font-bold text-text-primary">₦{(provider.startingPrice || provider.rate).toLocaleString()} starting</span>
                       <span className="text-sm text-text-tertiary ml-2">{provider.availability}</span>
                     </div>
                     <div className="flex space-x-2">
@@ -276,6 +273,12 @@ const CategoryList = () => {
                         onClick={() => navigate(`/chat/${encodeURIComponent(`worker-${provider.id}`)}`)}
                       >
                         Message
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/worker/${categoryId}/${provider.id}`)}
+                      >
+                        Book
                       </Button>
                     </div>
                   </div>

@@ -16,19 +16,19 @@ export const useData = () => {
 const isMongoObjectId = (value) => typeof value === 'string' && /^[a-fA-F0-9]{24}$/.test(value);
 
 const baseCategories = [
-  { id: 'nanny', name: 'Nanny', icon: '👶' },
-  { id: 'maid', name: 'House Maid', icon: '🧹' },
-  { id: 'cook', name: 'Cook', icon: '🍳' },
-  { id: 'driver', name: 'Driver', icon: '🚗' },
-  { id: 'gardener', name: 'Gardener', icon: '🌱' },
-  { id: 'cleaner', name: 'Cleaner', icon: '🧽' },
-  { id: 'tutor', name: 'Tutor', icon: '📚' },
-  { id: 'security', name: 'Security', icon: '🛡️' },
-  { id: 'engineer', name: 'Engineer', icon: '⚙️' },
-  { id: 'mechanic', name: 'Mechanic', icon: '🔧' },
-  { id: 'carpenter', name: 'Carpenter', icon: '🔨' },
-  { id: 'plumber', name: 'Plumber', icon: '🔩' },
-  { id: 'electrician', name: 'Electrician', icon: '💡' },
+  { id: 'nanny', name: 'Nanny', icon: 'care' },
+  { id: 'maid', name: 'House Maid', icon: 'cleaning' },
+  { id: 'cook', name: 'Cook', icon: 'chef' },
+  { id: 'driver', name: 'Driver', icon: 'car' },
+  { id: 'gardener', name: 'Gardener', icon: 'leaf' },
+  { id: 'cleaner', name: 'Cleaner', icon: 'cleaning' },
+  { id: 'tutor', name: 'Tutor', icon: 'book' },
+  { id: 'security', name: 'Security', icon: 'shield' },
+  { id: 'engineer', name: 'Engineer', icon: 'gear' },
+  { id: 'mechanic', name: 'Mechanic', icon: 'wrench' },
+  { id: 'carpenter', name: 'Carpenter', icon: 'hammer' },
+  { id: 'plumber', name: 'Plumber', icon: 'pipe' },
+  { id: 'electrician', name: 'Electrician', icon: 'electric' },
 ];
 const categoryNameById = baseCategories.reduce((acc, category) => {
   acc[category.id] = category.name;
@@ -62,6 +62,8 @@ const mapBackendWorkerToUi = (worker) => {
   const workerUser = worker?.userId && typeof worker.userId === 'object' ? worker.userId : {};
   const fullName = workerUser.fullName || 'Worker';
   const categoryId = inferCategoryFromWorker(worker);
+  const completedJobs = worker.completedBookings || Math.max(0, (worker.totalBookings || 0) - (worker.cancelledBookings || 0));
+  const startingPrice = worker.hourlyRate || 2500;
   return {
     id: worker._id,
     categoryId,
@@ -72,7 +74,8 @@ const mapBackendWorkerToUi = (worker) => {
     rating: worker.averageRating || 0,
     reviews: worker.totalReviews || 0,
     bio: worker.bio || 'Professional service provider',
-    rate: worker.hourlyRate || 2500,
+    rate: startingPrice,
+    startingPrice,
     availability: worker.isAvailable ? 'Available Today' : 'Not Available',
     verified: worker.verificationStatus === 'verified',
     skills: worker.skills?.length ? worker.skills : ['General Services'],
@@ -80,6 +83,10 @@ const mapBackendWorkerToUi = (worker) => {
     age: worker.age || '',
     experience: worker.yearsExperience ? `${worker.yearsExperience} years` : '1 year',
     languages: worker.languages?.length ? worker.languages : ['English'],
+    completedJobs,
+    distanceKm: typeof worker.distanceKm === 'number' ? worker.distanceKm : null,
+    latitude: Number.isFinite(worker.latitude) ? worker.latitude : null,
+    longitude: Number.isFinite(worker.longitude) ? worker.longitude : null,
     createdAt: worker.createdAt,
   };
 };

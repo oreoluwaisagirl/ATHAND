@@ -5,6 +5,7 @@ import { useData } from '../context/DataContext';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
 import { Card, CardContent } from '../components/Card';
+import AppIcon from '../components/AppIcon';
 import { resolveAvatar } from '../lib/avatars';
 
 const WorkerProfile = () => {
@@ -26,7 +27,7 @@ const WorkerProfile = () => {
       navigate('/login');
       return;
     }
-    navigate('/booking-location');
+    navigate('/booking', { state: { worker, categoryId } });
   };
 
   const handleMessage = () => {
@@ -36,6 +37,15 @@ const WorkerProfile = () => {
       return;
     }
     navigate(`/chat/${encodeURIComponent(`worker-${worker.id}`)}`);
+  };
+
+  const handleCall = () => {
+    const target = worker.phoneNumber || '';
+    if (!target) {
+      alert('Phone number is not available for this worker yet.');
+      return;
+    }
+    window.location.href = `tel:${target}`;
   };
 
   if (!worker) {
@@ -66,7 +76,7 @@ const WorkerProfile = () => {
           onClick={() => navigate('/notification-settings')}
           className="text-text-secondary hover:text-text-primary"
         >
-          🔔
+          <AppIcon name="bell" className="h-5 w-5" />
         </button>
       </div>
 
@@ -85,7 +95,7 @@ const WorkerProfile = () => {
             <div className="flex items-center justify-center gap-2 mb-1">
               <h2 className="text-2xl font-bold text-text-primary">{worker.name}</h2>
               {worker.verified && (
-                <Badge variant="success" size="sm">✓ Verified</Badge>
+                <Badge variant="success" size="sm">Verified</Badge>
               )}
             </div>
             <p className="text-text-secondary">{category?.name}</p>
@@ -93,8 +103,10 @@ const WorkerProfile = () => {
             
             {/* Rating */}
             <div className="flex items-center justify-center mt-2">
-              <div className="flex text-amber mr-1">
-                {'★'.repeat(Math.floor(worker.rating))}
+              <div className="mr-1 flex text-amber">
+                {Array.from({ length: Math.max(1, Math.floor(worker.rating || 0)) }).map((_, index) => (
+                  <AppIcon key={index} name="star" className="h-4 w-4 fill-current stroke-current" />
+                ))}
               </div>
               <span className="text-text-secondary">{worker.rating} ({worker.reviews} reviews)</span>
             </div>
@@ -104,7 +116,7 @@ const WorkerProfile = () => {
 
       {/* Quick Stats */}
       <div className="bg-container px-4 py-4 border-b border-border">
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-xl font-bold text-amber">₦{worker.rate.toLocaleString()}</div>
             <div className="text-xs text-text-secondary">per hour</div>
@@ -116,6 +128,10 @@ const WorkerProfile = () => {
           <div>
             <div className="text-xl font-bold text-amber">{worker.age}</div>
             <div className="text-xs text-text-secondary">Years Old</div>
+          </div>
+          <div>
+            <div className="text-xl font-bold text-amber">{worker.completedJobs || 0}</div>
+            <div className="text-xs text-text-secondary">Completed Jobs</div>
           </div>
         </div>
       </div>
@@ -170,27 +186,70 @@ const WorkerProfile = () => {
         <div className="flex flex-wrap gap-2">
           {worker.verified && (
             <Badge variant="success" className="whitespace-nowrap">
-              ✓ NIN Verified
+              NIN Verified
             </Badge>
           )}
           <Badge variant="primary" className="whitespace-nowrap">
-            ✓ ID Verified
+            ID Verified
           </Badge>
           <Badge variant="warning" className="whitespace-nowrap">
-            ✓ Background Checked
+            Background Checked
           </Badge>
         </div>
       </div>
 
+      {/* Portfolio */}
+      <div className="px-4 py-4">
+        <h3 className="text-lg font-semibold text-text-primary mb-3">Portfolio</h3>
+        {Array.isArray(worker.portfolioImages) && worker.portfolioImages.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2">
+            {worker.portfolioImages.slice(0, 6).map((imageUrl, index) => (
+              <img
+                key={`${imageUrl}-${index}`}
+                src={imageUrl}
+                alt={`${worker.name} portfolio ${index + 1}`}
+                className="h-24 w-full rounded-md border border-border object-cover"
+              />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="p-4 text-sm text-text-secondary">
+              No portfolio uploaded yet.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Reviews */}
+      <div className="px-4 py-4">
+        <h3 className="text-lg font-semibold text-text-primary mb-3">Reviews</h3>
+        <Card>
+          <CardContent className="p-4">
+            <p className="flex items-center gap-1 text-sm text-text-secondary"><AppIcon name="star" className="h-4 w-4 text-orange-500" />{worker.rating} average from {worker.reviews || 0} customer reviews.</p>
+            {(worker.reviews || 0) === 0 ? (
+              <p className="mt-2 text-sm text-text-tertiary">No public review comments yet.</p>
+            ) : null}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Action Buttons */}
-      <div className="px-4 py-4 fixed bottom-16 left-0 right-0 bg-container border-t border-border">
+      <div className="px-4 py-4 fixed bottom-16 left-0 right-0 bg-container border-t border-border md:static md:mt-6 md:mx-auto md:max-w-3xl md:rounded-lg md:border">
         <div className="flex space-x-3">
           <Button 
             variant="outline" 
             className="flex-1"
             onClick={handleMessage}
           >
-            💬 Message
+            Chat
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={handleCall}
+          >
+            Call
           </Button>
           <Button 
             className="flex-1"

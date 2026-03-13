@@ -1,13 +1,16 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
+import { v4 as uuidv4 } from 'uuid';
 import { authenticate, authorize } from '../middleware/auth.js';
 import Booking from '../models/Booking.js';
 import Worker from '../models/Worker.js';
 import Service from '../models/Service.js';
 import Notification from '../models/Notification.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { transferToWorker } from '../utils/paystack.js';
 
 const router = express.Router();
+const generateReference = () => `ATH_PAYOUT_${Date.now()}_${uuidv4().slice(0, 8)}`;
 
 // Check slot availability
 const checkSlotAvailability = async (workerId, scheduledDate, scheduledTime, duration, excludeBookingId = null) => {
@@ -58,7 +61,17 @@ router.post('/', authenticate, async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { workerId, serviceId, address, scheduledDate, scheduledTime, duration, notes, emergency } = req.body;
+    const {
+      workerId,
+      serviceId,
+      address,
+      scheduledDate,
+      scheduledTime,
+      duration,
+      notes,
+      emergency,
+      emergencyType
+    } = req.body;
 
     // Verify worker exists and is available
     const worker = await Worker.findById(workerId);
@@ -103,6 +116,8 @@ router.post('/', authenticate, async (req, res, next) => {
       duration,
       notes,
       emergency: emergency || false,
+      emergencyType: emergency ? emergencyType || null : null,
+      emergencyStatus: emergency ? (initialStatus === 'confirmed' ? 'assigned' : 'requested') : null,
       price,
       status: initialStatus
     });
@@ -334,7 +349,8 @@ router.put('/:id/status', authenticate, async (req, res, next) => {
     const validTransitions = {
       pending: ['confirmed', 'cancelled', 'rejected'],
       confirmed: ['in_progress', 'cancelled'],
-      in_progress: ['completed', 'cancelled'],
+      in_progress: ['awaiting_confirmation', 'cancelled'],
+      awaiting_confirmation: ['completed', 'cancelled'],
       completed: [],
       cancelled: [],
       rejected: []
@@ -348,23 +364,91 @@ router.put('/:id/status', authenticate, async (req, res, next) => {
       throw new AppError(`Cannot change status from ${booking.status} to ${status}`, 400);
     }
 
+    // Role-based transition rules for escrow flow
+    if (status === 'in_progress' && !isWorker && !isAdmin) {
+      throw new AppError('Only worker or admin can start this booking', 403);
+    }
+
+    if (status === 'confirmed' && !isWorker && !isAdmin) {
+      throw new AppError('Only worker or admin can confirm this booking', 403);
+    }
+
+    if (status === 'rejected' && !isWorker && !isAdmin) {
+      throw new AppError('Only worker or admin can reject this booking', 403);
+    }
+
+    if (status === 'awaiting_confirmation' && !isWorker && !isAdmin) {
+      throw new AppError('Only worker or admin can mark job as completed', 403);
+    }
+
+    if (status === 'completed' && !isOwner && !isAdmin) {
+      throw new AppError('Only customer or admin can confirm completion', 403);
+    }
+
     booking.status = status;
 
     if (status === 'confirmed') {
       booking.confirmedAt = new Date();
+      if (booking.emergency) booking.emergencyStatus = 'assigned';
     } else if (status === 'in_progress') {
       booking.startedAt = new Date();
-    } else if (status === 'completed') {
+      if (booking.emergency) booking.emergencyStatus = 'in_progress';
+    } else if (status === 'awaiting_confirmation') {
       booking.completedAt = new Date();
-      // Update worker stats
+      if (booking.emergency) booking.emergencyStatus = 'awaiting_confirmation';
+    } else if (status === 'completed') {
+      booking.customerConfirmedAt = new Date();
+      if (booking.emergency) booking.emergencyStatus = 'completed';
+      // Keep completedAt populated even for old bookings where worker skipped awaiting_confirmation.
+      if (!booking.completedAt) {
+        booking.completedAt = new Date();
+      }
+      // Update worker stats when customer confirms completion.
       await Worker.findByIdAndUpdate(booking.workerId._id, {
         $inc: { completedBookings: 1, totalBookings: 1 }
       });
+
+      // Auto-release escrow on customer confirmation.
+      if (['held', 'paid'].includes(booking.paymentStatus) && !booking.workerPaid) {
+        const worker = await Worker.findById(booking.workerId._id);
+        if (!worker?.paystackRecipientCode) {
+          throw new AppError('Worker payout account is not configured', 400);
+        }
+
+        const gross = booking.paymentAmount || booking.price;
+        const commissionRate = booking.commissionRate || 0.2;
+        const platformFee = Math.round(gross * commissionRate * 100) / 100;
+        const workerPayout = Math.round((gross - platformFee) * 100) / 100;
+        const payoutReference = generateReference();
+
+        await transferToWorker({
+          amount: workerPayout,
+          recipient: worker.paystackRecipientCode,
+          reference: payoutReference
+        });
+
+        booking.platformFee = platformFee;
+        booking.workerEarnings = workerPayout;
+        booking.workerPayoutAmount = workerPayout;
+        booking.workerPayoutReference = payoutReference;
+        booking.workerPaid = true;
+        booking.workerPaidAt = new Date();
+        booking.paymentStatus = 'released';
+
+        await Notification.create({
+          userId: worker.userId,
+          type: 'payment',
+          title: 'Escrow Released',
+          message: `₦${workerPayout} has been released to your account`,
+          data: { bookingId: booking._id }
+        });
+      }
     } else if (status === 'cancelled') {
       if (isOwner) booking.cancelledBy = 'user';
       else if (isWorker) booking.cancelledBy = 'worker';
       else booking.cancelledBy = 'admin';
       booking.cancellationReason = cancellationReason;
+      if (booking.emergency) booking.emergencyStatus = 'cancelled';
       // Update worker stats
       await Worker.findByIdAndUpdate(booking.workerId._id, {
         $inc: { cancelledBookings: 1, totalBookings: 1 }
@@ -383,6 +467,84 @@ router.put('/:id/status', authenticate, async (req, res, next) => {
       data: { bookingId: booking._id }
     });
 
+    res.json({ success: true, booking });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update emergency dispatch status (worker/admin)
+router.put('/:id/emergency-status', authenticate, async (req, res, next) => {
+  try {
+    const { emergencyStatus } = req.body;
+    const allowed = ['requested', 'assigned', 'en_route', 'arrived', 'in_progress', 'awaiting_confirmation', 'cancelled'];
+
+    if (!allowed.includes(emergencyStatus)) {
+      throw new AppError('Invalid emergency status', 400);
+    }
+
+    const booking = await Booking.findById(req.params.id)
+      .populate('workerId')
+      .populate('userId', '_id');
+
+    if (!booking) {
+      throw new AppError('Booking not found', 404);
+    }
+
+    if (!booking.emergency) {
+      throw new AppError('This booking is not an emergency booking', 400);
+    }
+
+    const isOwner = booking.userId._id.toString() === req.user._id.toString();
+    const isWorker = booking.workerId.userId.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    const currentEmergencyStatus = booking.emergencyStatus || (booking.status === 'confirmed' ? 'assigned' : 'requested');
+    const validEmergencyTransitions = {
+      requested: ['assigned', 'cancelled'],
+      assigned: ['en_route', 'cancelled'],
+      en_route: ['arrived', 'cancelled'],
+      arrived: ['in_progress', 'cancelled'],
+      in_progress: ['awaiting_confirmation', 'cancelled'],
+      awaiting_confirmation: ['cancelled'],
+      cancelled: [],
+      completed: []
+    };
+
+    if (!validEmergencyTransitions[currentEmergencyStatus]?.includes(emergencyStatus)) {
+      throw new AppError(`Cannot change emergency status from ${currentEmergencyStatus} to ${emergencyStatus}`, 400);
+    }
+
+    const workerOnlyStatuses = ['assigned', 'en_route', 'arrived', 'in_progress', 'awaiting_confirmation'];
+    if (workerOnlyStatuses.includes(emergencyStatus) && !isWorker && !isAdmin) {
+      throw new AppError('Only worker or admin can update this emergency stage', 403);
+    }
+
+    if (emergencyStatus === 'cancelled' && !isOwner && !isWorker && !isAdmin) {
+      throw new AppError('Access denied', 403);
+    }
+
+    booking.emergencyStatus = emergencyStatus;
+
+    if (['in_progress', 'awaiting_confirmation', 'completed', 'cancelled'].includes(emergencyStatus)) {
+      const statusMap = {
+        in_progress: 'in_progress',
+        awaiting_confirmation: 'awaiting_confirmation',
+        completed: 'completed',
+        cancelled: 'cancelled'
+      };
+      booking.status = statusMap[emergencyStatus];
+    }
+
+    if (emergencyStatus === 'in_progress' && !booking.startedAt) {
+      booking.startedAt = new Date();
+    }
+
+    if (emergencyStatus === 'awaiting_confirmation' && !booking.completedAt) {
+      booking.completedAt = new Date();
+    }
+
+    await booking.save();
     res.json({ success: true, booking });
   } catch (error) {
     next(error);

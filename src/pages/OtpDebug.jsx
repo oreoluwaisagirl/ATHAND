@@ -10,7 +10,8 @@ const OtpDebug = () => {
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const apiBase = 'http://localhost:5000/api';
+  const apiOrigin = import.meta.env.VITE_API_URL || '';
+  const apiBase = apiOrigin ? `${apiOrigin.replace(/\/+$/, '')}/api` : 'http://localhost:5000/api';
 
   const callApi = async (path, body) => {
     setIsLoading(true);

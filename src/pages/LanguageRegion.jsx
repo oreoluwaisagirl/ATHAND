@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import AppIcon from '../components/AppIcon';
 
 const LanguageRegion = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const LanguageRegion = () => {
             >
               <span className="text-text-primary">{lang.name}</span>
               {selectedLanguage === lang.code && (
-                <span className="text-amber">✓</span>
+                <AppIcon name="shield" className="h-4 w-4 text-amber" />
               )}
             </div>
           ))}
@@ -67,7 +68,7 @@ const LanguageRegion = () => {
                 <p className="text-sm text-text-tertiary">{region.currency}</p>
               </div>
               {selectedRegion === region.code && (
-                <span className="text-amber">✓</span>
+                <AppIcon name="shield" className="h-4 w-4 text-amber" />
               )}
             </div>
           ))}
@@ -78,4 +79,3 @@ const LanguageRegion = () => {
 };
 
 export default LanguageRegion;
-

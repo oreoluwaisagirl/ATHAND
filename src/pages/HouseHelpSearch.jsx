@@ -65,7 +65,7 @@ const HouseHelpSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 md:pb-10">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <div className="mb-6 rounded-3xl border border-white/60 bg-white/75 p-6 shadow-xl">
           <img

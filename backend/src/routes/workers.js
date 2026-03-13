@@ -9,6 +9,40 @@ import Review from '../models/Review.js';
 import Booking from '../models/Booking.js';
 
 const router = express.Router();
+const EMERGENCY_CATEGORY_MAP = {
+  mechanic: ['mechanic', 'vehicle', 'car repair', 'auto', 'tyre', 'engine'],
+  plumber: ['plumber', 'plumb', 'pipe', 'water leak', 'drainage'],
+  electrician: ['electrician', 'electric', 'wiring', 'electrical', 'power'],
+  generator_repair: ['generator', 'gen set', 'inverter', 'power backup', 'electrical'],
+};
+
+const estimateEtaMinutes = (worker, locationMatch) => {
+  const baseline = locationMatch ? 18 : 28;
+  const responsePenalty = worker.responseTime ? Math.min(Math.round(worker.responseTime / 2), 8) : 4;
+  const trustBonus = worker.trustScore ? Math.min(Math.round(worker.trustScore / 25), 3) : 0;
+  const eta = baseline + responsePenalty - trustBonus;
+  return Math.max(20, Math.min(40, eta));
+};
+
+const matchesEmergencyCategory = (worker, category, serviceNames = []) => {
+  if (!category || !EMERGENCY_CATEGORY_MAP[category]) return true;
+  const keywords = EMERGENCY_CATEGORY_MAP[category];
+  const blob = `${worker.occupation || ''} ${worker.bio || ''} ${(worker.skills || []).join(' ')} ${serviceNames.join(' ')}`.toLowerCase();
+  return keywords.some((keyword) => blob.includes(keyword));
+};
+
+const haversineKm = (lat1, lon1, lat2, lon2) => {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+    * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
+};
 
 // Get all workers (public)
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -132,6 +166,8 @@ router.post('/', authenticate, authorize('admin'), [
       yearsExperience,
       profilePhotoUrl,
       location,
+      latitude,
+      longitude,
       hourlyRate,
       languages,
       skills,
@@ -163,6 +199,8 @@ router.post('/', authenticate, authorize('admin'), [
       yearsExperience: Number(yearsExperience || 0),
       profilePhotoUrl: profilePhotoUrl || null,
       serviceArea: location ? [location] : [],
+      latitude: latitude !== undefined ? Number(latitude) : null,
+      longitude: longitude !== undefined ? Number(longitude) : null,
       hourlyRate: hourlyRate ? Number(hourlyRate) : null,
       languages: Array.isArray(languages) ? languages : [],
       skills: Array.isArray(skills) ? skills : [],
@@ -192,6 +230,127 @@ router.get('/featured', async (req, res, next) => {
       .limit(10);
 
     res.json({ success: true, data: workers });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Emergency categories
+router.get('/emergency/categories', async (req, res, next) => {
+  try {
+    const categories = [
+      { id: 'mechanic', label: 'Emergency Mechanic' },
+      { id: 'plumber', label: 'Emergency Plumber' },
+      { id: 'electrician', label: 'Emergency Electrician' },
+      { id: 'generator_repair', label: 'Emergency Generator Repair' },
+    ];
+    res.json({ success: true, data: categories });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Emergency nearby workers (ETA-focused dispatch list)
+router.get('/emergency/nearby', optionalAuth, async (req, res, next) => {
+  try {
+    const { location = 'Lagos', category, page = 1, limit = 20, latitude, longitude } = req.query;
+    const numericLimit = Math.min(parseInt(limit, 10) || 20, 50);
+    const userLat = latitude !== undefined ? Number(latitude) : null;
+    const userLng = longitude !== undefined ? Number(longitude) : null;
+    const hasUserCoords = Number.isFinite(userLat) && Number.isFinite(userLng);
+
+    const workerQuery = {
+      emergencyServices: true,
+      isAvailable: true
+    };
+
+    const workers = await Worker.find(workerQuery)
+      .populate('userId', 'fullName email phone profilePhotoUrl')
+      .sort({ availableNow: -1, trustScore: -1, averageRating: -1 })
+      .limit(200);
+
+    const workerServices = await WorkerService.find({
+      workerId: { $in: workers.map((worker) => worker._id) },
+      isActive: true
+    }).populate('serviceId', 'name slug');
+
+    const servicesByWorker = workerServices.reduce((acc, ws) => {
+      const key = ws.workerId.toString();
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(ws.serviceId);
+      return acc;
+    }, {});
+
+    const normalizedLocation = String(location).trim().toLowerCase();
+    const matchedWorkers = workers
+      .filter((worker) => {
+        const workerId = worker._id.toString();
+        const serviceNames = (servicesByWorker[workerId] || []).map((service) => service?.name || '');
+        return matchesEmergencyCategory(worker, category, serviceNames);
+      })
+      .map((worker) => {
+        const workerId = worker._id.toString();
+        const linkedServices = servicesByWorker[workerId] || [];
+        const keywords = category ? EMERGENCY_CATEGORY_MAP[category] || [] : [];
+        const recommendedService = linkedServices.find((service) => {
+          const blob = `${service?.name || ''} ${service?.slug || ''}`.toLowerCase();
+          return keywords.some((keyword) => blob.includes(keyword));
+        }) || linkedServices[0] || null;
+        const serviceArea = Array.isArray(worker.serviceArea) ? worker.serviceArea : [];
+        const locationMatch = serviceArea.some((area) => area.toLowerCase().includes(normalizedLocation));
+        let distanceKm = null;
+        if (
+          hasUserCoords
+          && Number.isFinite(worker.latitude)
+          && Number.isFinite(worker.longitude)
+        ) {
+          distanceKm = Number(haversineKm(userLat, userLng, worker.latitude, worker.longitude).toFixed(1));
+        }
+
+        const etaMinutes = distanceKm !== null
+          ? Math.max(20, Math.min(40, Math.round(distanceKm * 4 + 16)))
+          : estimateEtaMinutes(worker, locationMatch);
+        const etaWindow = `${Math.max(20, etaMinutes - 5)}-${Math.min(40, etaMinutes + 5)} mins`;
+        return {
+          ...worker.toObject(),
+          emergencyCategoryMatch: category || null,
+          etaMinutes,
+          etaWindow,
+          distanceKm,
+          locationMatch,
+          recommendedService: recommendedService ? {
+            id: recommendedService._id,
+            name: recommendedService.name,
+            slug: recommendedService.slug
+          } : null
+        };
+      })
+      .sort((a, b) => {
+        if (a.etaMinutes !== b.etaMinutes) return a.etaMinutes - b.etaMinutes;
+        if ((a.distanceKm ?? Number.MAX_SAFE_INTEGER) !== (b.distanceKm ?? Number.MAX_SAFE_INTEGER)) {
+          return (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER);
+        }
+        if (a.availableNow !== b.availableNow) return Number(b.availableNow) - Number(a.availableNow);
+        return (b.trustScore || 0) - (a.trustScore || 0);
+      });
+
+    const start = (parseInt(page, 10) - 1) * numericLimit;
+    const data = matchedWorkers.slice(start, start + numericLimit);
+
+    res.json({
+      success: true,
+      data,
+      pagination: {
+        page: parseInt(page, 10) || 1,
+        limit: numericLimit,
+        total: matchedWorkers.length,
+        pages: Math.ceil(matchedWorkers.length / numericLimit) || 1
+      },
+      meta: {
+        location,
+        category: category || 'all'
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -262,10 +421,10 @@ router.put('/:id', authenticate, async (req, res, next) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const allowedFields = [
+  const allowedFields = [
       'occupation', 'bio', 'yearsExperience', 'profilePhotoUrl', 'introVideoUrl',
       'serviceArea', 'availability', 'hourlyRate', 'languages', 'skills',
-      'emergencyServices', 'isAvailable'
+      'emergencyServices', 'isAvailable', 'latitude', 'longitude'
     ];
 
     allowedFields.forEach(field => {

@@ -1,16 +1,70 @@
-# React + Vite
+# ATHAND
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ATHAND is a two-part project:
+- Frontend: React + Vite (`/`)
+- Backend: Express + MongoDB (`/backend`)
 
-Currently, two official plugins are available:
+## Run Locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Frontend:
+```bash
+cd /Users/oreoluwa/ATHAND
+npm install
+npm run dev
+```
 
-## React Compiler
+Backend:
+```bash
+cd /Users/oreoluwa/ATHAND/backend
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Required Environment Variables
 
-## Expanding the ESLint configuration
+### Frontend (`/Users/oreoluwa/ATHAND/.env.local`)
+```env
+VITE_API_URL=https://athand-1.onrender.com
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_javascript_api_key
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Backend (`/Users/oreoluwa/ATHAND/backend/.env`)
+```env
+MONGODB_URI=...
+JWT_SECRET=...
+FRONTEND_URL=http://localhost:5173
+
+# Paystack (required for payment init/verify/payout transfer)
+PAYSTACK_SECRET_KEY=sk_live_or_test_key
+PAYSTACK_PUBLIC_KEY=pk_live_or_test_key
+```
+
+Paystack keys are required because backend payment utilities call Paystack APIs directly in:
+- `backend/src/utils/paystack.js`
+- `backend/src/routes/payments.js`
+
+Without `PAYSTACK_SECRET_KEY`, payment initialize/verify/transfer routes will fail.
+
+## Maps and Live Markers
+
+Emergency and tracking screens now use Google Maps JavaScript SDK with live markers.
+
+For markers to appear for workers, workers should have coordinates:
+- `worker.latitude`
+- `worker.longitude`
+
+These are now supported in the backend worker model/routes.
+
+## Build
+
+Frontend build:
+```bash
+cd /Users/oreoluwa/ATHAND
+npm run build
+```
+
+Backend has no compile step; deploy with:
+```bash
+cd /Users/oreoluwa/ATHAND/backend
+npm run start
+```
