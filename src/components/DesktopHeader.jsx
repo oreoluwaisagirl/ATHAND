@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
+import { useAuth } from '../context/AuthContext';
 
 const links = [
   { to: '/', label: 'Home' },
@@ -15,6 +16,11 @@ const links = [
 const DesktopHeader = () => {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const { isAuthenticated, user } = useAuth();
+  const userInitial = String(user?.fullName || user?.name || user?.email || 'A')
+    .trim()
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <header className={`sticky top-0 z-40 hidden md:block ${isHome ? 'border-b border-white/10 bg-[#120d0b]/80' : 'border-b border-border bg-container/92'} backdrop-blur-xl`}>
@@ -42,14 +48,44 @@ const DesktopHeader = () => {
               );
             })}
           </nav>
-          <div className={`flex items-center gap-3 ${isHome ? 'text-white' : 'text-text-primary'}`}>
-            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${isHome ? 'border-primary/40 bg-primary/20 text-primary' : 'border-border bg-background'}`}>
-              <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-            </span>
-            <span className={`inline-flex h-9 w-9 items-center justify-center rounded-full border-2 ${isHome ? 'border-orange-300 bg-orange-100 text-slate-900' : 'border-border bg-background text-text-primary'}`}>
-              A
-            </span>
-          </div>
+          {isAuthenticated ? (
+            <Link
+              to="/profile"
+              className={`inline-flex items-center gap-3 rounded-full border px-3 py-2 text-sm font-medium transition ${
+                isHome
+                  ? 'border-white/15 bg-white/5 text-white hover:bg-white/10'
+                  : 'border-border bg-background text-text-primary hover:border-primary/40'
+              }`}
+            >
+              <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full border-2 ${
+                isHome ? 'border-orange-300 bg-orange-100 text-slate-900' : 'border-border bg-background text-text-primary'
+              }`}>
+                {userInitial}
+              </span>
+              <span>Account</span>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link
+                to="/login"
+                className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition ${
+                  isHome ? 'text-white/82 hover:text-white' : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  isHome
+                    ? 'border-accent bg-accent text-white hover:bg-accent-darker'
+                    : 'border-accent bg-accent text-white hover:bg-accent-darker'
+                }`}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
           <DarkModeToggle className={isHome ? '!border-white/15 !bg-white/5 !text-white hover:!bg-white/10' : '!bg-background !text-text-secondary hover:!bg-background-secondary'} />
         </div>
       </div>
