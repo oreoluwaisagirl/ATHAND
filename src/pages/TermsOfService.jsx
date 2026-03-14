@@ -1,68 +1,48 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import InteriorPage from '../components/InteriorPage';
+import { Card, CardContent } from '../components/Card';
+
+const sections = [
+  ['Acceptance of Terms', 'By accessing and using ATHAND, you accept and agree to be bound by the terms and provision of this agreement.'],
+  ['Use License', 'Permission is granted to use ATHAND for personal, marketplace-related access subject to these platform terms.'],
+  ['User Accounts', 'You are responsible for maintaining the confidentiality of your account credentials and activity.'],
+  ['Booking and Payments', 'All bookings made through ATHAND remain subject to booking conditions, provider availability, and payment terms.'],
+  ['Service Providers', 'ATHAND connects users with independent providers and does not directly perform the listed services.'],
+  ['Privacy', 'Your privacy matters, and data handling is governed by the platform privacy standards and related policies.'],
+  ['Limitation of Liability', 'ATHAND shall not be liable for indirect, incidental, or consequential damages arising from platform use.'],
+  ['Contact Information', 'For legal or policy questions, contact support@athand.com.'],
+];
 
 const TermsOfService = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-container shadow-sm px-4 py-3 flex items-center border-b border-border">
-        <button onClick={() => navigate(-1)} className="mr-3 text-text-primary">
-          ←
-        </button>
-        <h1 className="text-xl font-semibold text-text-primary">Terms of Service</h1>
-      </div>
-
-      {/* Content */}
-      <div className="px-4 py-6">
-        <div className="bg-container p-6 rounded-lg border border-border">
-          <p className="text-sm text-text-secondary mb-4">Last updated: March 2024</p>
-          
-          <h3 className="text-lg font-semibold text-text-primary mb-2">1. Acceptance of Terms</h3>
-          <p className="text-text-secondary mb-4">
-            By accessing and using ATHAND, you accept and agree to be bound by the terms and provision of this agreement.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">2. Use License</h3>
-          <p className="text-text-secondary mb-4">
-            Permission is granted to temporarily use ATHAND for personal, non-commercial use only.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">3. User Accounts</h3>
-          <p className="text-text-secondary mb-4">
-            You are responsible for maintaining the confidentiality of your account and password.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">4. Booking and Payments</h3>
-          <p className="text-text-secondary mb-4">
-            All bookings made through ATHAND are subject to our booking policies and payment terms.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">5. Service Providers</h3>
-          <p className="text-text-secondary mb-4">
-            ATHAND provides a platform to connect users with independent service providers. We are not responsible for the services provided.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">6. Privacy</h3>
-          <p className="text-text-secondary mb-4">
-            Your privacy is important to us. Please review our Privacy Policy to understand how we collect and use your information.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">7. Limitation of Liability</h3>
-          <p className="text-text-secondary mb-4">
-            ATHAND shall not be liable for any indirect, incidental, or consequential damages.
-          </p>
-
-          <h3 className="text-lg font-semibold text-text-primary mb-2">8. Contact Information</h3>
-          <p className="text-text-secondary">
-            For questions about these Terms of Service, please contact us at support@athand.com
-          </p>
+    <InteriorPage
+      kicker="Terms of Service"
+      title="Policy content presented in the same interface language as the home page."
+      description="Even legal content should feel part of the same product. This page now uses the same softer section framing, stronger typography, and cleaner reading rhythm."
+      badge="Last updated: March 2024"
+      aside={(
+        <div className="space-y-3">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Read Time</p>
+          <p className="text-3xl font-black tracking-[-0.04em] text-text-primary">8 Sections</p>
+          <p className="text-sm leading-7 text-text-secondary">A concise overview of account use, bookings, provider relationships, and liability.</p>
         </div>
-      </div>
-    </div>
+      )}
+    >
+      <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+        <CardContent className="p-6 sm:p-8">
+          <div className="space-y-8">
+            {sections.map(([title, body], index) => (
+              <div key={title} className={index === sections.length - 1 ? '' : 'border-b border-[#f0e6de] pb-8'}>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">Section {index + 1}</p>
+                <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-text-primary">{title}</h2>
+                <p className="mt-4 max-w-4xl text-sm leading-8 text-text-secondary">{body}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </InteriorPage>
   );
 };
 
 export default TermsOfService;
-

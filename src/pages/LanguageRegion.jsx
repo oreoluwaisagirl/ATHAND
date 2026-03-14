@@ -1,80 +1,96 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import AppIcon from '../components/AppIcon';
+import InteriorPage from '../components/InteriorPage';
+import { Card, CardContent } from '../components/Card';
+
+const languages = [
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
+  { code: 'es', name: 'Español' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'pt', name: 'Português' },
+];
+
+const regions = [
+  { code: 'ng', name: 'Nigeria', currency: 'NGN (₦)' },
+  { code: 'gh', name: 'Ghana', currency: 'GHS (₵)' },
+  { code: 'ke', name: 'Kenya', currency: 'KES (KSh)' },
+  { code: 'za', name: 'South Africa', currency: 'ZAR (R)' },
+  { code: 'uk', name: 'United Kingdom', currency: 'GBP (£)' },
+];
+
+const OptionCard = ({ title, subtitle, selected, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`flex w-full items-center justify-between rounded-[1.4rem] border px-4 py-4 text-left transition ${
+      selected ? 'border-accent bg-[#fff5ee]' : 'border-[#f0e6de] bg-[#faf7f4] hover:bg-white'
+    }`}
+  >
+    <div>
+      <p className="font-semibold text-text-primary">{title}</p>
+      {subtitle ? <p className="mt-1 text-sm text-text-secondary">{subtitle}</p> : null}
+    </div>
+    {selected ? (
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-white">
+        <AppIcon name="shield" className="h-4 w-4" />
+      </span>
+    ) : null}
+  </button>
+);
 
 const LanguageRegion = () => {
-  const navigate = useNavigate();
-
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const [selectedRegion, setSelectedRegion] = React.useState('ng');
 
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    { code: 'es', name: 'Español' },
-    { code: 'de', name: 'Deutsch' },
-    { code: 'pt', name: 'Português' },
-  ];
-
-  const regions = [
-    { code: 'ng', name: 'Nigeria', currency: 'NGN (₦)' },
-    { code: 'gh', name: 'Ghana', currency: 'GHS (₵)' },
-    { code: 'ke', name: 'Kenya', currency: 'KES (KSh)' },
-    { code: 'za', name: 'South Africa', currency: 'ZAR (R)' },
-    { code: 'uk', name: 'United Kingdom', currency: 'GBP (£)' },
-  ];
-
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-container shadow-sm px-4 py-3 flex items-center border-b border-border">
-        <button onClick={() => navigate(-1)} className="mr-3 text-text-primary">
-          ←
-        </button>
-        <h1 className="text-xl font-semibold text-text-primary">Language & Region</h1>
-      </div>
-
-      {/* Language Selection */}
-      <div className="px-4 py-4">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Language</h2>
-        <div className="bg-container rounded-lg border border-border divide-y divide-border">
-          {languages.map((lang) => (
-            <div
-              key={lang.code}
-              className="p-4 flex items-center justify-between cursor-pointer"
-              onClick={() => setSelectedLanguage(lang.code)}
-            >
-              <span className="text-text-primary">{lang.name}</span>
-              {selectedLanguage === lang.code && (
-                <AppIcon name="shield" className="h-4 w-4 text-amber" />
-              )}
-            </div>
-          ))}
+    <InteriorPage
+      kicker="Language & Region"
+      title="Regional preferences aligned with the new marketplace layout."
+      description="This settings page now uses the same visual hierarchy as the landing page, with editorial headings, rounded surfaces, and cleaner state selection."
+      badge="Customize language and currency context"
+      aside={(
+        <div className="space-y-3">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Localization</p>
+          <p className="text-2xl font-black leading-tight text-text-primary">Choose the language and currency context that best matches your market.</p>
         </div>
-      </div>
-
-      {/* Region Selection */}
-      <div className="px-4 py-4">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Region & Currency</h2>
-        <div className="bg-container rounded-lg border border-border divide-y divide-border">
-          {regions.map((region) => (
-            <div
-              key={region.code}
-              className="p-4 flex items-center justify-between cursor-pointer"
-              onClick={() => setSelectedRegion(region.code)}
-            >
-              <div>
-                <span className="text-text-primary">{region.name}</span>
-                <p className="text-sm text-text-tertiary">{region.currency}</p>
-              </div>
-              {selectedRegion === region.code && (
-                <AppIcon name="shield" className="h-4 w-4 text-amber" />
-              )}
+      )}
+    >
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+          <CardContent className="p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Language</p>
+            <div className="mt-5 space-y-3">
+              {languages.map((lang) => (
+                <OptionCard
+                  key={lang.code}
+                  title={lang.name}
+                  selected={selectedLanguage === lang.code}
+                  onClick={() => setSelectedLanguage(lang.code)}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+          <CardContent className="p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">Region & Currency</p>
+            <div className="mt-5 space-y-3">
+              {regions.map((region) => (
+                <OptionCard
+                  key={region.code}
+                  title={region.name}
+                  subtitle={region.currency}
+                  selected={selectedRegion === region.code}
+                  onClick={() => setSelectedRegion(region.code)}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </InteriorPage>
   );
 };
 

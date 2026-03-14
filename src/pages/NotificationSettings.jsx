@@ -1,9 +1,40 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import InteriorPage from '../components/InteriorPage';
+import { Card, CardContent } from '../components/Card';
+
+const Toggle = ({ checked, onChange }) => (
+  <button
+    type="button"
+    onClick={onChange}
+    className={`relative h-7 w-14 rounded-full transition ${checked ? 'bg-accent' : 'bg-[#d8d2cc]'}`}
+  >
+    <span
+      className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${checked ? 'left-8' : 'left-1'}`}
+    />
+  </button>
+);
+
+const notificationGroups = [
+  {
+    title: 'Notification Channels',
+    items: [
+      ['push', 'Push Notifications', 'Receive notifications directly on your device.'],
+      ['email', 'Email Notifications', 'Receive updates and account changes via email.'],
+      ['sms', 'SMS Notifications', 'Get important text-message updates when needed.'],
+    ],
+  },
+  {
+    title: 'Notification Types',
+    items: [
+      ['bookings', 'Booking Updates', 'Status changes, reminders, and schedule updates.'],
+      ['promotions', 'Promotions & Deals', 'Offers, discounts, and platform announcements.'],
+      ['reviews', 'Reviews', 'Notifications when new feedback is left on completed work.'],
+      ['messages', 'Messages', 'New chat activity from providers or support.'],
+    ],
+  },
+];
 
 const NotificationSettings = () => {
-  const navigate = useNavigate();
-
   const [notifications, setNotifications] = React.useState({
     push: true,
     email: true,
@@ -15,119 +46,46 @@ const NotificationSettings = () => {
   });
 
   const toggleNotification = (key) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-container shadow-sm px-4 py-3 flex items-center border-b border-border">
-        <button onClick={() => navigate(-1)} className="mr-3 text-text-primary">
-          ←
-        </button>
-        <h1 className="text-xl font-semibold text-text-primary">Notification Settings</h1>
-      </div>
-
-      {/* Notification Channels */}
-      <div className="px-4 py-4">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Notification Channels</h2>
-        <div className="bg-container rounded-lg border border-border divide-y divide-border">
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">Push Notifications</h3>
-              <p className="text-sm text-text-secondary">Receive notifications on your device</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('push')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.push ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${notifications.push ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </div>
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">Email Notifications</h3>
-              <p className="text-sm text-text-secondary">Receive updates via email</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('email')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.email ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${notifications.email ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </div>
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">SMS Notifications</h3>
-              <p className="text-sm text-text-secondary">Receive text messages</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('sms')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.sms ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${notifications.sms ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
+    <InteriorPage
+      kicker="Preferences"
+      title="Notification settings rebuilt around the home-page system."
+      description="The older settings rows have been restructured into softer marketplace-style cards with more space, stronger hierarchy, and cleaner toggles."
+      badge="Manage channels and message types"
+      aside={(
+        <div className="space-y-4">
+          <div className="rounded-[1.5rem] bg-[#120d0b] p-5 text-white">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/60">Preferences</p>
+            <p className="mt-3 text-2xl font-black leading-tight">Control how ATHAND reaches you without losing context.</p>
           </div>
         </div>
+      )}
+    >
+      <div className="space-y-6">
+        {notificationGroups.map((group) => (
+          <Card key={group.title} className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+            <CardContent className="p-6 sm:p-8">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">{group.title}</p>
+              <div className="mt-5 space-y-4">
+                {group.items.map(([key, title, description]) => (
+                  <div key={key} className="flex items-center justify-between gap-4 rounded-[1.4rem] border border-[#f0e6de] bg-[#faf7f4] px-4 py-4">
+                    <div className="max-w-xl">
+                      <h3 className="font-semibold text-text-primary">{title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-text-secondary">{description}</p>
+                    </div>
+                    <Toggle checked={notifications[key]} onChange={() => toggleNotification(key)} />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      {/* Notification Types */}
-      <div className="px-4 py-4">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Notification Types</h2>
-        <div className="bg-container rounded-lg border border-border divide-y divide-border">
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">Booking Updates</h3>
-              <p className="text-sm text-text-secondary">Status changes, reminders</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('bookings')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.bookings ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${notifications.bookings ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </div>
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">Promotions & Deals</h3>
-              <p className="text-sm text-text-secondary">Special offers and discounts</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('promotions')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.promotions ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform-transition ${notifications.promotions ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </div>
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">Reviews</h3>
-              <p className="text-sm text-text-secondary">New reviews on your bookings</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('reviews')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.reviews ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${notifications.reviews ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </div>
-          <div className="p-4 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-text-primary">Messages</h3>
-              <p className="text-sm text-text-secondary">New messages from providers</p>
-            </div>
-            <button
-              onClick={() => toggleNotification('messages')}
-              className={`w-12 h-6 rounded-full transition-colors ${notifications.messages ? 'bg-amber' : 'bg-gray-300'}`}
-            >
-              <div className={`w-5 h-5 bg-white rounded-full shadow transform transition-transform ${notifications.messages ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </InteriorPage>
   );
 };
 
 export default NotificationSettings;
-

@@ -1,101 +1,73 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import AppIcon from '../components/AppIcon';
+import InteriorPage from '../components/InteriorPage';
+import { Card, CardContent } from '../components/Card';
+
+const features = [
+  { icon: 'home', title: 'Home Services', description: 'A broad surface for daily help, urgent needs, and specialist bookings.' },
+  { icon: 'shield', title: 'Verified Providers', description: 'Profiles are structured to look credible and easier to compare.' },
+  { icon: 'chat', title: 'Direct Communication', description: 'Customers and providers stay connected through in-app messaging.' },
+  { icon: 'star', title: 'Ratings & Trust', description: 'Reviews, completion signals, and cleaner cards support faster decisions.' },
+];
 
 const AboutATHAND = () => {
-  const navigate = useNavigate();
-
-  const features = [
-    { icon: 'home', title: 'Home Services', description: 'Find reliable help for your home' },
-    { icon: 'shield', title: 'Verified Providers', description: 'All providers are vetted' },
-    { icon: 'chat', title: 'Easy Communication', description: 'Chat directly with providers' },
-    { icon: 'star', title: 'Reviews & Ratings', description: 'Make informed decisions' },
-  ];
-
   return (
-    <div className="min-h-screen bg-background pb-20">
-      {/* Header */}
-      <div className="bg-container shadow-sm px-4 py-3 flex items-center border-b border-border">
-        <button onClick={() => navigate(-1)} className="mr-3 text-text-primary">
-          ←
-        </button>
-        <h1 className="text-xl font-semibold text-text-primary">About ATHAND</h1>
-      </div>
-
-      {/* App Info */}
-      <div className="px-4 py-8 text-center">
-        <div className="w-20 h-20 bg-amber rounded-2xl flex items-center justify-center mx-auto mb-4 text-white">
-          <AppIcon name="home" className="h-9 w-9" />
+    <InteriorPage
+      kicker="About ATHAND"
+      title="A service marketplace with a clearer product story."
+      description="ATHAND connects customers with home and technical service providers through a marketplace interface designed to feel more trustworthy, more premium, and easier to navigate."
+      badge="Marketplace positioning, trust, and operational clarity"
+      aside={(
+        <div className="space-y-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-accent text-white">
+            <AppIcon name="home" className="h-8 w-8" />
+          </div>
+          <p className="text-2xl font-black leading-tight text-text-primary">ATHAND now presents itself more like a serious service brand than a generic utility app.</p>
         </div>
-        <h2 className="text-2xl font-bold text-text-primary mb-2">ATHAND</h2>
-        <p className="text-text-secondary mb-2">Version 1.0.0</p>
-        <p className="text-text-tertiary">Your trusted home service platform</p>
+      )}
+    >
+      <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+        <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+          <CardContent className="p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Platform Overview</p>
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-text-primary">Built for trusted discovery, cleaner booking, and better provider presentation.</h2>
+            <p className="mt-5 text-sm leading-8 text-text-secondary">
+              ATHAND is a platform that helps users find reliable service providers for home and technical work. The interface now follows the same editorial marketplace direction introduced on the home page so the rest of the product feels like one system.
+            </p>
+            <p className="mt-4 text-sm leading-8 text-text-secondary">
+              Whether someone needs house help, cleaning, salon support, home move assistance, or painting, the goal is simple: clearer categories, stronger provider cards, and less friction moving from discovery into booking.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-[#faf7f4]">
+          <CardContent className="p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">Contact</p>
+            <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-text-primary">Reach the ATHAND team.</h3>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Questions, demos, feedback, or support requests can be routed through the support channel below.</p>
+            <Button variant="outline" className="mt-6 w-full gap-2 rounded-xl">
+              <AppIcon name="mail" className="h-4 w-4" />
+              support@athand.com
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Features */}
-      <div className="px-4 py-4">
-        <h3 className="text-lg font-semibold text-text-primary mb-4">Why ATHAND?</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {features.map((feature, index) => (
-            <div key={index} className="bg-container p-4 rounded-lg border border-border">
-              <span className="mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-background text-text-primary">
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {features.map((feature) => (
+          <Card key={feature.title} className="rounded-[1.6rem] border border-[#eadfd6] bg-[#f4f6fb]">
+            <CardContent className="p-6">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-text-primary shadow-sm">
                 <AppIcon name={feature.icon} className="h-5 w-5" />
               </span>
-              <h4 className="font-semibold text-text-primary mb-1">{feature.title}</h4>
-              <p className="text-xs text-text-secondary">{feature.description}</p>
-            </div>
-          ))}
-        </div>
+              <h3 className="mt-4 text-lg font-bold text-text-primary">{feature.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-text-secondary">{feature.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
-
-      {/* About Text */}
-      <div className="px-4 py-4">
-        <div className="bg-container p-4 rounded-lg border border-border">
-          <h3 className="font-semibold text-text-primary mb-2">About Us</h3>
-          <p className="text-text-secondary text-sm">
-            ATHAND is a platform that connects users with trusted home service providers. 
-            Whether you need a house help, tutor, cleaner, or any other home service, 
-            ATHAND makes it easy to find and book reliable professionals in your area.
-          </p>
-        </div>
-      </div>
-
-      {/* Contact */}
-      <div className="px-4 py-4">
-        <div className="bg-container p-4 rounded-lg border border-border">
-          <h3 className="font-semibold text-text-primary mb-2">Contact Us</h3>
-          <p className="text-text-secondary text-sm mb-3">
-            Have questions or feedback? We'd love to hear from you!
-          </p>
-          <Button variant="outline" className="w-full gap-2">
-            <AppIcon name="mail" className="h-4 w-4" />
-            support@athand.com
-          </Button>
-        </div>
-      </div>
-
-      {/* Social Links */}
-      <div className="px-4 py-4 text-center">
-        <p className="text-text-tertiary text-sm mb-3">Follow us on social media</p>
-        <div className="flex justify-center space-x-4">
-          <button className="w-10 h-10 bg-container rounded-full flex items-center justify-center border border-border text-text-primary">
-            <AppIcon name="facebook" className="h-4 w-4" />
-          </button>
-          <button className="w-10 h-10 bg-container rounded-full flex items-center justify-center border border-border text-text-primary">
-            <AppIcon name="instagram" className="h-4 w-4" />
-          </button>
-          <button className="w-10 h-10 bg-container rounded-full flex items-center justify-center border border-border text-text-primary">
-            <AppIcon name="twitter" className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Copyright */}
-      <div className="px-4 py-6 text-center">
-        <p className="text-xs text-text-tertiary">© 2024 ATHAND. All rights reserved.</p>
-      </div>
-    </div>
+    </InteriorPage>
   );
 };
 
