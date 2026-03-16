@@ -6,7 +6,7 @@ import Worker from '../models/Worker.js';
 import OtpCode from '../models/OtpCode.js';
 import { authenticate } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { generateOtp, hashOtp, normalizeEmail, normalizePhone, sendOtpSms } from '../utils/otp.js';
+import { generateOtp, hashOtp, normalizeEmail, normalizePhone } from '../utils/otp.js';
 import { sendEmail } from '../utils/email.js';
 
 const router = express.Router();
@@ -134,7 +134,29 @@ const sendOtpEmail = async ({ email, code, purpose }) => {
   return { success: true, provider: 'email' };
 };
 
-const getOtpChannelForPurpose = (purpose) => (purpose === 'login' ? 'phone' : 'email');
+const getLoginOtpRecipient = async ({ phone, email }) => {
+  if (!phone && !email) {
+    throw new AppError('Email or phone is required for login OTP', 400);
+  }
+
+  const query = email ? { email } : { phone };
+  const existingUser = await User.findOne(query);
+  if (!existingUser) {
+    throw new AppError(email ? 'No user found with this email' : 'No user found with this phone number', 404);
+  }
+
+  const resolvedEmail = normalizeEmail(existingUser.email);
+  if (!resolvedEmail) {
+    throw new AppError('This account does not have an email address for OTP delivery', 400);
+  }
+
+  return {
+    user: existingUser,
+    email: resolvedEmail,
+    phone: existingUser.phone ? normalizePhone(existingUser.phone) : (phone || null),
+    channel: 'email',
+  };
+};
 
 // Debug/Test OTP generator (no SMS/email delivery)
 router.post('/otp/generate', [
@@ -158,45 +180,44 @@ router.post('/otp/generate', [
     const email = rawEmail ? normalizeEmail(rawEmail) : null;
     const { purpose } = req.body;
 
-    const channel = getOtpChannelForPurpose(purpose);
-    if (channel === 'email' && !email) throw new AppError('Email is required for this OTP purpose', 400);
-    if (channel === 'phone' && !phone) throw new AppError('Phone is required for this OTP purpose', 400);
+    let channel = 'email';
+    let otpEmail = email;
+    let otpPhone = phone;
 
     if (purpose === 'login') {
-      const existingUser = await User.findOne({ phone });
-      if (!existingUser) {
-        throw new AppError('No user found with this phone number', 404);
-      }
-    }
-
-    if (purpose === 'signup') {
+      const recipient = await getLoginOtpRecipient({ phone, email });
+      channel = recipient.channel;
+      otpEmail = recipient.email;
+      otpPhone = recipient.phone;
+    } else if (purpose === 'signup') {
+      if (!email) throw new AppError('Email is required for this OTP purpose', 400);
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         throw new AppError('Email already registered', 400);
       }
-    }
-    if (purpose === 'password_reset') {
+    } else if (purpose === 'password_reset') {
+      if (!email) throw new AppError('Email is required for this OTP purpose', 400);
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
         throw new AppError('No user found with this email', 404);
       }
     }
 
-    await enforceOtpRateLimit({ phone, email, purpose });
+    await enforceOtpRateLimit({ email: otpEmail, purpose });
 
     if (OTP_TEST_MODE && !/^\d{6}$/.test(OTP_TEST_CODE)) {
       throw new AppError('OTP_TEST_CODE must be a 6-digit numeric string', 500);
     }
 
     const code = OTP_TEST_MODE ? OTP_TEST_CODE : generateOtp();
-    const otpTarget = channel === 'email' ? email : phone;
+    const otpTarget = otpEmail;
     const codeHash = hashOtp(otpTarget, purpose, code);
     const expiresAt = new Date(Date.now() + (OTP_EXPIRY_MINUTES * 60 * 1000));
 
     await OtpCode.create({
       channel,
-      phone,
-      email,
+      phone: otpPhone,
+      email: otpEmail,
       purpose,
       codeHash,
       expiresAt,
@@ -208,6 +229,7 @@ router.post('/otp/generate', [
       purpose,
       channel,
       expiresInSeconds: OTP_EXPIRY_MINUTES * 60,
+      email: otpEmail,
       otp: code,
     });
   } catch (error) {
@@ -233,45 +255,44 @@ router.post('/otp/request', [
     const email = rawEmail ? normalizeEmail(rawEmail) : null;
     const { purpose } = req.body;
 
-    const channel = getOtpChannelForPurpose(purpose);
-    if (channel === 'email' && !email) throw new AppError('Email is required for this OTP purpose', 400);
-    if (channel === 'phone' && !phone) throw new AppError('Phone is required for this OTP purpose', 400);
+    let channel = 'email';
+    let otpEmail = email;
+    let otpPhone = phone;
 
     if (purpose === 'login') {
-      const existingUser = await User.findOne({ phone });
-      if (!existingUser) {
-        throw new AppError('No user found with this phone number', 404);
-      }
-    }
-
-    if (purpose === 'signup') {
+      const recipient = await getLoginOtpRecipient({ phone, email });
+      channel = recipient.channel;
+      otpEmail = recipient.email;
+      otpPhone = recipient.phone;
+    } else if (purpose === 'signup') {
+      if (!email) throw new AppError('Email is required for this OTP purpose', 400);
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         throw new AppError('Email already registered', 400);
       }
-    }
-    if (purpose === 'password_reset') {
+    } else if (purpose === 'password_reset') {
+      if (!email) throw new AppError('Email is required for this OTP purpose', 400);
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
         throw new AppError('No user found with this email', 404);
       }
     }
 
-    await enforceOtpRateLimit({ phone, email, purpose });
+    await enforceOtpRateLimit({ email: otpEmail, purpose });
 
     if (OTP_TEST_MODE && !/^\d{6}$/.test(OTP_TEST_CODE)) {
       throw new AppError('OTP_TEST_CODE must be a 6-digit numeric string', 500);
     }
 
     const code = OTP_TEST_MODE ? OTP_TEST_CODE : generateOtp();
-    const otpTarget = channel === 'email' ? email : phone;
+    const otpTarget = otpEmail;
     const codeHash = hashOtp(otpTarget, purpose, code);
     const expiresAt = new Date(Date.now() + (OTP_EXPIRY_MINUTES * 60 * 1000));
 
     await OtpCode.create({
       channel,
-      phone,
-      email,
+      phone: otpPhone,
+      email: otpEmail,
       purpose,
       codeHash,
       expiresAt,
@@ -279,15 +300,15 @@ router.post('/otp/request', [
 
     const delivery = OTP_TEST_MODE
       ? { success: true, provider: 'test-mode', skippedSms: true }
-      : channel === 'email'
-        ? await sendOtpEmail({ email, code, purpose })
-        : await sendOtpSms({ phone, code, purpose });
+      : await sendOtpEmail({ email: otpEmail, code, purpose });
 
     res.json({
       success: true,
       message: 'OTP sent successfully',
       expiresInSeconds: OTP_EXPIRY_MINUTES * 60,
       deliveryProvider: delivery?.provider || 'unknown',
+      deliveryChannel: channel,
+      ...(process.env.NODE_ENV !== 'production' && otpEmail ? { deliveryEmail: otpEmail } : {}),
       ...(delivery?.skippedSms && { skippedSms: true }),
       ...(delivery?.fallback && { deliveryFallback: true, deliveryReason: delivery?.reason || null }),
       ...((process.env.NODE_ENV !== 'production' || OTP_EXPOSE_CODE) && { devOtp: code }),
@@ -315,16 +336,24 @@ router.post('/otp/verify', [
     const phone = rawPhone ? normalizePhone(rawPhone) : null;
     const email = rawEmail ? normalizeEmail(rawEmail) : null;
     const { purpose, code } = req.body;
-    const channel = getOtpChannelForPurpose(purpose);
-    const otpTarget = channel === 'email' ? email : phone;
+    let channel = 'email';
+    let otpEmail = email;
+    let otpPhone = phone;
 
-    if (!otpTarget) {
-      throw new AppError(channel === 'email' ? 'Email is required' : 'Phone is required', 400);
+    if (purpose === 'login') {
+      const recipient = await getLoginOtpRecipient({ phone, email });
+      channel = recipient.channel;
+      otpEmail = recipient.email;
+      otpPhone = recipient.phone;
+    } else if (!email) {
+      throw new AppError('Email is required', 400);
     }
+
+    const otpTarget = otpEmail;
 
     const otpRecord = await OtpCode.findOne({
       channel,
-      ...(channel === 'email' ? { email } : { phone }),
+      email: otpEmail,
       purpose,
       verifiedAt: null,
       usedAt: null,
@@ -355,7 +384,7 @@ router.post('/otp/verify', [
     otpRecord.usedAt = new Date();
     await otpRecord.save();
 
-    const otpToken = generateOtpSessionToken({ phone, email, purpose });
+    const otpToken = generateOtpSessionToken({ phone: otpPhone, email: otpEmail, purpose });
 
     res.json({
       success: true,
@@ -386,6 +415,46 @@ router.post('/phone-login', [
     const user = await User.findOne({ phone });
     if (!user) {
       throw new AppError('No user found with this phone number', 404);
+    }
+
+    if (!user.isActive) {
+      throw new AppError('Account is deactivated', 403);
+    }
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = generateToken(user._id);
+
+    res.json({
+      success: true,
+      token,
+      user: user.toJSON(),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Email login using verified OTP token
+router.post('/email-login', [
+  body('email').isEmail().normalizeEmail(),
+  body('otpToken').notEmpty(),
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const email = normalizeEmail(req.body.email);
+    const { otpToken } = req.body;
+
+    validateOtpSessionToken({ token: otpToken, expectedPurpose: 'login', email });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new AppError('No user found with this email', 404);
     }
 
     if (!user.isActive) {

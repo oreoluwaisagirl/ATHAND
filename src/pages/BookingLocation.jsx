@@ -5,9 +5,9 @@ import AppIcon from '../components/AppIcon';
 import GoogleLiveMap from '../components/GoogleLiveMap';
 
 const cityOptions = [
-  { id: 'new-york', label: 'New York,\nNew York', active: true, center: { lat: 40.7128, lng: -74.006 } },
+  { id: 'lagos', label: 'Lagos,\nNigeria', active: true, center: { lat: 6.5244, lng: 3.3792 } },
   { id: 'los-angeles', label: 'Los Angeles,\nCalifornia', center: { lat: 34.0522, lng: -118.2437 } },
-  { id: 'chicago', label: 'Chicago,\nNew York', center: { lat: 41.8781, lng: -87.6298 } },
+  { id: 'chicago', label: 'Chicago,\nLagos', center: { lat: 41.8781, lng: -87.6298 } },
   { id: 'houston', label: 'Houston,\nTexas', center: { lat: 29.7604, lng: -95.3698 } },
   { id: 'phoenix', label: 'Phoenix,\nArizona', center: { lat: 33.4484, lng: -112.074 } },
 ];
@@ -16,7 +16,7 @@ const steps = ['Location', 'Service', 'Date & Time', 'Information', 'Confirmatio
 
 const BookingLocation = () => {
   const navigate = useNavigate();
-  const [selectedCity, setSelectedCity] = useState('new-york');
+  const [selectedCity, setSelectedCity] = useState('lagos');
 
   const currentCity = useMemo(
     () => cityOptions.find((city) => city.id === selectedCity) || cityOptions[0],

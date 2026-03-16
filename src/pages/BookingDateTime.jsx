@@ -32,12 +32,12 @@ const BookingDateTime = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-text-primary">
       {/* Top Navigation */}
-      <div className="bg-white shadow-sm px-4 py-3 flex items-center justify-between">
+      <div className="bg-container shadow-sm px-4 py-3 flex items-center justify-between border-b border-border">
         <button
           onClick={() => navigate('/booking-summary')}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-text-secondary hover:text-text-primary"
         >
           ←
         </button>
@@ -46,13 +46,13 @@ const BookingDateTime = () => {
       </div>
 
       {/* Progress Indicator */}
-      <div className="bg-white px-4 py-2 border-b border-gray-200">
+      <div className="bg-container px-4 py-2 border-b border-border">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
-          <div className="flex-1 h-1 bg-gray-200 rounded">
+          <div className="flex-1 h-1 bg-background-secondary rounded">
             <div className="w-2/4 h-1 bg-primary rounded"></div>
           </div>
-          <span className="text-sm text-gray-600">Step 2 of 4</span>
+          <span className="text-sm text-text-secondary">Step 2 of 4</span>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ const BookingDateTime = () => {
                   className={`px-4 py-2 border rounded-lg whitespace-nowrap ${
                     selectedDate === option.date
                       ? 'border-primary bg-primary text-white'
-                      : 'border-gray-300 hover:border-gray-400'
+                      : 'border-border bg-container hover:border-text-tertiary text-text-primary'
                   }`}
                 >
                   {option.label}
@@ -89,10 +89,10 @@ const BookingDateTime = () => {
                   className={`p-3 border rounded-lg text-center ${
                     selectedDate === date.date
                       ? 'border-primary bg-primary text-white'
-                      : 'border-gray-300 hover:border-gray-400'
+                      : 'border-border bg-container hover:border-text-tertiary text-text-primary'
                   }`}
                 >
-                  <div className="text-xs text-gray-500 mb-1">{date.day}</div>
+                  <div className="mb-1 text-xs text-text-tertiary">{date.day}</div>
                   <div className="text-lg font-semibold">{date.display}</div>
                 </button>
               ))}
@@ -108,7 +108,7 @@ const BookingDateTime = () => {
           <CardContent>
             {/* Morning */}
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Morning</h4>
+              <h4 className="mb-2 text-sm font-medium text-text-secondary">Morning</h4>
               <div className="grid grid-cols-3 gap-2">
                 {morningSlots.map((time) => (
                   <button
@@ -117,7 +117,7 @@ const BookingDateTime = () => {
                     className={`p-2 border rounded text-center text-sm ${
                       selectedTime === time
                         ? 'border-primary bg-primary text-white'
-                        : 'border-gray-300 hover:border-gray-400'
+                        : 'border-border bg-container hover:border-text-tertiary text-text-primary'
                     }`}
                   >
                     {time}
@@ -128,7 +128,7 @@ const BookingDateTime = () => {
 
             {/* Afternoon */}
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Afternoon</h4>
+              <h4 className="mb-2 text-sm font-medium text-text-secondary">Afternoon</h4>
               <div className="grid grid-cols-3 gap-2">
                 {afternoonSlots.map((time) => (
                   <button
@@ -137,7 +137,7 @@ const BookingDateTime = () => {
                     className={`p-2 border rounded text-center text-sm ${
                       selectedTime === time
                         ? 'border-primary bg-primary text-white'
-                        : 'border-gray-300 hover:border-gray-400'
+                        : 'border-border bg-container hover:border-text-tertiary text-text-primary'
                     }`}
                   >
                     {time}
@@ -148,7 +148,7 @@ const BookingDateTime = () => {
 
             {/* Evening */}
             <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Evening</h4>
+              <h4 className="mb-2 text-sm font-medium text-text-secondary">Evening</h4>
               <div className="grid grid-cols-3 gap-2">
                 {eveningSlots.map((time) => (
                   <button
@@ -157,7 +157,7 @@ const BookingDateTime = () => {
                     className={`p-2 border rounded text-center text-sm ${
                       selectedTime === time
                         ? 'border-primary bg-primary text-white'
-                        : 'border-gray-300 hover:border-gray-400'
+                        : 'border-border bg-container hover:border-text-tertiary text-text-primary'
                     }`}
                   >
                     {time}
@@ -172,23 +172,23 @@ const BookingDateTime = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-gray-700">Duration</span>
+              <span className="text-text-secondary">Duration</span>
               <span className="font-semibold">8 hours</span>
             </div>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="mt-1 text-sm text-text-secondary">
               Service will end approximately at {selectedTime ? calculateEndTime(selectedTime, 8) : '5:00 PM'}
             </p>
           </CardContent>
         </Card>
 
         {/* Provider Availability Notice */}
-        <Card className="bg-green-50 border-green-200">
+        <Card className="border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/40">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="text-green-600 text-xl">✅</div>
+              <div className="text-xl text-green-600 dark:text-green-400">✅</div>
               <div>
-                <h4 className="font-semibold text-green-900 mb-1">Available</h4>
-                <p className="text-sm text-green-800">
+                <h4 className="mb-1 font-semibold text-green-900 dark:text-green-200">Available</h4>
+                <p className="text-sm text-green-800 dark:text-green-300">
                   This provider is typically available during weekdays 8am-6pm. Your selected time is within their preferred hours.
                 </p>
               </div>
@@ -229,7 +229,7 @@ const BookingDateTime = () => {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:static md:mt-6 md:mx-auto md:max-w-3xl md:rounded-lg md:border">
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-container p-4 md:static md:mt-6 md:mx-auto md:max-w-3xl md:rounded-lg md:border">
         <div className="flex space-x-3">
           <Button
             variant="outline"

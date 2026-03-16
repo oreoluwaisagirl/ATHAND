@@ -72,15 +72,15 @@ const Profile = () => {
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-white px-3 py-4 text-center shadow-sm">
+            <div className="rounded-2xl bg-container px-3 py-4 text-center shadow-sm">
               <p className="text-2xl font-black text-text-primary">{bookings.length}</p>
               <p className="text-xs uppercase tracking-[0.16em] text-text-tertiary">Bookings</p>
             </div>
-            <div className="rounded-2xl bg-white px-3 py-4 text-center shadow-sm">
+            <div className="rounded-2xl bg-container px-3 py-4 text-center shadow-sm">
               <p className="text-2xl font-black text-text-primary">{recentBookings.filter((b) => b.status === 'completed').length}</p>
               <p className="text-xs uppercase tracking-[0.16em] text-text-tertiary">Completed</p>
             </div>
-            <div className="rounded-2xl bg-white px-3 py-4 text-center shadow-sm">
+            <div className="rounded-2xl bg-container px-3 py-4 text-center shadow-sm">
               <p className="text-2xl font-black text-text-primary">{savedProviders.length}</p>
               <p className="text-xs uppercase tracking-[0.16em] text-text-tertiary">Providers</p>
             </div>
@@ -90,7 +90,7 @@ const Profile = () => {
     >
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="space-y-6">
-          <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+          <Card className="rounded-[1.8rem] border border-border bg-container">
             <CardContent className="p-6 sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Account Details</p>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -100,7 +100,7 @@ const Profile = () => {
                   ['Location', displayUser.location],
                   ['Role', user?.role || 'user'],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-[1.4rem] border border-[#f0e6de] bg-[#faf7f4] px-4 py-4">
+                  <div key={label} className="rounded-[1.4rem] border border-border bg-container-secondary px-4 py-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-tertiary">{label}</p>
                     <p className="mt-2 text-sm font-medium text-text-primary">{value}</p>
                   </div>
@@ -109,7 +109,7 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+          <Card className="rounded-[1.8rem] border border-border bg-container">
             <CardContent className="p-6 sm:p-8">
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -119,7 +119,7 @@ const Profile = () => {
               </div>
 
               {recentBookings.length === 0 ? (
-                <div className="mt-5 rounded-[1.4rem] border border-[#f0e6de] bg-[#faf7f4] px-4 py-5 text-sm text-text-secondary">
+                <div className="mt-5 rounded-[1.4rem] border border-border bg-container-secondary px-4 py-5 text-sm text-text-secondary">
                   No booking records yet.
                 </div>
               ) : (
@@ -128,7 +128,7 @@ const Profile = () => {
                     <button
                       key={booking.id || booking._id || idx}
                       type="button"
-                      className="w-full rounded-[1.4rem] border border-[#f0e6de] bg-[#faf7f4] px-4 py-4 text-left transition hover:bg-white"
+                      className="w-full rounded-[1.4rem] border border-border bg-container-secondary px-4 py-4 text-left transition hover:bg-container"
                       onClick={() => navigate(`/booking-tracking/${booking.id || booking._id}`)}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -151,7 +151,7 @@ const Profile = () => {
         </div>
 
         <div className="space-y-6">
-          <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-[#faf7f4]">
+          <Card className="rounded-[1.8rem] border border-border bg-container-secondary">
             <CardContent className="p-6 sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">Quick Actions</p>
               <div className="mt-5 space-y-3">
@@ -170,11 +170,11 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+          <Card className="rounded-[1.8rem] border border-border bg-container">
             <CardContent className="p-6 sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Top Providers</p>
               {savedProviders.length === 0 ? (
-                <div className="mt-5 rounded-[1.4rem] border border-[#f0e6de] bg-[#faf7f4] px-4 py-5 text-sm text-text-secondary">
+                <div className="mt-5 rounded-[1.4rem] border border-border bg-container-secondary px-4 py-5 text-sm text-text-secondary">
                   No providers available yet.
                 </div>
               ) : (
@@ -183,7 +183,7 @@ const Profile = () => {
                     <button
                       key={provider.id}
                       type="button"
-                      className="rounded-[1.4rem] border border-[#f0e6de] bg-[#faf7f4] p-4 text-left transition hover:bg-white"
+                      className="rounded-[1.4rem] border border-border bg-container-secondary p-4 text-left transition hover:bg-container"
                       onClick={() => navigate(`/worker/${provider.categoryId}/${provider.id}`)}
                     >
                       <img

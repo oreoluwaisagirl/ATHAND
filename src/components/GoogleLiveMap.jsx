@@ -93,18 +93,18 @@ const GoogleLiveMap = ({ center, markers = [], height = 260, className = '' }) =
 
   if (error) {
     return (
-      <div className={`overflow-hidden rounded-md border border-border bg-[#eef4ea] ${className}`} style={{ height }}>
-        <div className="relative h-full w-full bg-[linear-gradient(0deg,rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] bg-[size:40px_40px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(78,173,102,0.2),transparent_16%),radial-gradient(circle_at_70%_40%,rgba(78,173,102,0.12),transparent_18%),linear-gradient(180deg,#f2efe8,#e7efe0)]" />
+      <div className={`overflow-hidden rounded-md border border-border bg-[#eef4ea] dark:bg-slate-900 ${className}`} style={{ height }}>
+        <div className="relative h-full w-full bg-[linear-gradient(0deg,rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] bg-[size:40px_40px] dark:bg-[linear-gradient(0deg,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(78,173,102,0.2),transparent_16%),radial-gradient(circle_at_70%_40%,rgba(78,173,102,0.12),transparent_18%),linear-gradient(180deg,#f2efe8,#e7efe0)] dark:bg-[radial-gradient(circle_at_20%_30%,rgba(78,173,102,0.18),transparent_16%),radial-gradient(circle_at_70%_40%,rgba(78,173,102,0.12),transparent_18%),linear-gradient(180deg,#0f172a,#111827)]" />
           <div className="absolute inset-0 opacity-40">
-            <div className="absolute left-[12%] top-[18%] h-1 w-[38%] rotate-[16deg] bg-[#d8c8bb]" />
-            <div className="absolute left-[26%] top-[42%] h-1 w-[48%] -rotate-[10deg] bg-[#d8c8bb]" />
-            <div className="absolute left-[18%] top-[66%] h-1 w-[54%] rotate-[4deg] bg-[#d8c8bb]" />
-            <div className="absolute left-[56%] top-[12%] h-[76%] w-1 rotate-[6deg] bg-[#d8c8bb]" />
+            <div className="absolute left-[12%] top-[18%] h-1 w-[38%] rotate-[16deg] bg-[#d8c8bb] dark:bg-slate-600" />
+            <div className="absolute left-[26%] top-[42%] h-1 w-[48%] -rotate-[10deg] bg-[#d8c8bb] dark:bg-slate-600" />
+            <div className="absolute left-[18%] top-[66%] h-1 w-[54%] rotate-[4deg] bg-[#d8c8bb] dark:bg-slate-600" />
+            <div className="absolute left-[56%] top-[12%] h-[76%] w-1 rotate-[6deg] bg-[#d8c8bb] dark:bg-slate-600" />
           </div>
-          <div className="absolute left-6 top-6 rounded-md bg-white shadow">
-            <button className="block border-b border-border px-3 py-2 text-lg">+</button>
-            <button className="block px-3 py-2 text-lg">-</button>
+          <div className="absolute left-6 top-6 rounded-md bg-white shadow dark:bg-slate-800">
+            <button className="block border-b border-border px-3 py-2 text-lg text-text-primary">+</button>
+            <button className="block px-3 py-2 text-lg text-text-primary">-</button>
           </div>
           <div className="absolute bottom-6 right-6 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg">
             Live preview fallback

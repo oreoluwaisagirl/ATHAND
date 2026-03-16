@@ -24,7 +24,9 @@ const OptionCard = ({ title, subtitle, selected, onClick }) => (
     type="button"
     onClick={onClick}
     className={`flex w-full items-center justify-between rounded-[1.4rem] border px-4 py-4 text-left transition ${
-      selected ? 'border-accent bg-[#fff5ee]' : 'border-[#f0e6de] bg-[#faf7f4] hover:bg-white'
+      selected
+        ? 'border-accent bg-orange-50 dark:bg-accent/15'
+        : 'border-border bg-container-secondary hover:bg-container dark:hover:bg-slate-800'
     }`}
   >
     <div>
@@ -57,7 +59,7 @@ const LanguageRegion = () => {
       )}
     >
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+        <Card className="rounded-[1.8rem] border border-border bg-container">
           <CardContent className="p-6 sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Language</p>
             <div className="mt-5 space-y-3">
@@ -73,7 +75,7 @@ const LanguageRegion = () => {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[1.8rem] border border-[#eadfd6] bg-white">
+        <Card className="rounded-[1.8rem] border border-border bg-container">
           <CardContent className="p-6 sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">Region & Currency</p>
             <div className="mt-5 space-y-3">

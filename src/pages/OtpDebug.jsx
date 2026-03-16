@@ -33,19 +33,19 @@ const OtpDebug = () => {
   };
 
   const requestOtp = async () => {
-    const useEmail = purpose === 'signup' || purpose === 'password_reset';
     await callApi('/auth/otp/request', {
       purpose,
-      ...(useEmail ? { email } : { phone }),
+      ...(email ? { email } : {}),
+      ...(phone ? { phone } : {}),
     });
   };
 
   const verifyOtp = async () => {
-    const useEmail = purpose === 'signup' || purpose === 'password_reset';
     const data = await callApi('/auth/otp/verify', {
       purpose,
       code,
-      ...(useEmail ? { email } : { phone }),
+      ...(email ? { email } : {}),
+      ...(phone ? { phone } : {}),
     });
     if (data?.otpToken) {
       setOtpToken(data.otpToken);
@@ -54,6 +54,10 @@ const OtpDebug = () => {
 
   const loginWithPhone = async () => {
     await callApi('/auth/phone-login', { phone, otpToken });
+  };
+
+  const loginWithEmail = async () => {
+    await callApi('/auth/email-login', { email, otpToken });
   };
 
   return (
@@ -76,27 +80,25 @@ const OtpDebug = () => {
             </select>
           </div>
 
-          {purpose === 'signup' || purpose === 'password_reset' ? (
-            <div>
-              <label className="block text-sm mb-1">Email</label>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2"
-              />
-            </div>
-          ) : (
-            <div>
-              <label className="block text-sm mb-1">Phone</label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="08012345678"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Phone</label>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="08012345678"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2"
+            />
+          </div>
 
           <div className="flex flex-wrap gap-2">
             <Button onClick={requestOtp} disabled={isLoading}>1. Request OTP</Button>
@@ -128,6 +130,7 @@ const OtpDebug = () => {
 
           <div className="flex flex-wrap gap-2">
             <Button onClick={loginWithPhone} disabled={isLoading}>3. Phone Login (login purpose only)</Button>
+            <Button onClick={loginWithEmail} disabled={isLoading}>4. Email Login (login purpose only)</Button>
           </div>
         </div>
 

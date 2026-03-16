@@ -9,12 +9,12 @@ import { resolveAvatar } from '../lib/avatars';
 const heroTags = ['Electrician', 'Cleaner', 'Painting', 'Salon', 'Home Move'];
 
 const browseCategories = [
-  { id: 'cleaner', label: 'Cleaning', icon: 'cleaning', services: '36+ Service', tone: 'from-[#5c9dff] to-[#3f6ed8]' },
-  { id: 'driver', label: 'Home Move', icon: 'truck', services: '19+ Service', tone: 'from-[#ffbb4d] to-[#f08b32]' },
-  { id: 'electrician', label: 'Electrician', icon: 'electric', services: '16+ Service', tone: 'from-[#a855f7] to-[#7c3aed]' },
-  { id: 'nanny', label: 'Saloon', icon: 'care', services: '24+ Service', tone: 'from-[#ef5da8] to-[#c93a7b]' },
-  { id: 'gardener', label: 'Painting', icon: 'paint', services: '32+ Service', tone: 'from-[#63d297] to-[#36b37e]' },
-  { id: 'security', label: 'Helping', icon: 'shield', services: '21+ Service', tone: 'from-[#8aa0b8] to-[#61758b]' },
+  { id: 'cleaner', label: 'Cleaning', services: '36+ Service', tone: 'from-[#5c9dff] to-[#3f6ed8]', image: '/images/landing/category-cleaning.jpg' },
+  { id: 'driver', label: 'Home Move', services: '19+ Service', tone: 'from-[#ffbb4d] to-[#f08b32]', image: '/images/landing/category-moving.jpg' },
+  { id: 'electrician', label: 'Electrician', services: '16+ Service', tone: 'from-[#a855f7] to-[#7c3aed]', image: '/images/landing/category-electrician.jpg' },
+  { id: 'nanny', label: 'Saloon', services: '24+ Service', tone: 'from-[#ef5da8] to-[#c93a7b]', image: '/images/landing/category-nanny.jpg' },
+  { id: 'gardener', label: 'Painting', services: '32+ Service', tone: 'from-[#63d297] to-[#36b37e]', image: '/images/landing/category-gardening.jpg' },
+  { id: 'security', label: 'Helping', services: '21+ Service', tone: 'from-[#8aa0b8] to-[#61758b]', image: '/images/landing/category-cooking.jpg' },
 ];
 
 const valueCards = [
@@ -25,9 +25,9 @@ const valueCards = [
 ];
 
 const articleCards = [
-  { title: 'How to present a trusted service marketplace clearly', category: 'Marketplace', tone: 'from-[#4e8ef7] to-[#7fb4ff]' },
-  { title: 'Building confidence with verified workers and clean UX', category: 'Trust', tone: 'from-[#f0aa38] to-[#ffd36a]' },
-  { title: 'What users expect from service booking interfaces', category: 'Product', tone: 'from-[#ef6ca7] to-[#ff9dc4]' },
+  { title: 'How to present a trusted service marketplace clearly', category: 'Marketplace', tone: 'from-[#4e8ef7] to-[#7fb4ff]', image: '/images/landing/category-electrician.jpg' },
+  { title: 'Building confidence with verified workers and clean UX', category: 'Trust', tone: 'from-[#f0aa38] to-[#ffd36a]', image: '/images/landing/category-cleaning.jpg' },
+  { title: 'What users expect from service booking interfaces', category: 'Product', tone: 'from-[#ef6ca7] to-[#ff9dc4]', image: '/images/landing/category-moving.jpg' },
 ];
 
 const SectionHeading = ({ title, accent, actionLabel, onAction }) => (
@@ -49,7 +49,7 @@ const SectionHeading = ({ title, accent, actionLabel, onAction }) => (
 );
 
 const WorkerCard = ({ worker, onClick, imageTone = 'from-sky-200 to-white' }) => (
-  <Card className="overflow-hidden rounded-[1.5rem] border border-[#edf0f7] bg-white shadow-[0_18px_40px_rgba(39,55,86,0.08)]">
+  <Card className="overflow-hidden rounded-[1.5rem] border border-border bg-container shadow-[0_18px_40px_rgba(39,55,86,0.08)]">
     <div className={`relative h-52 overflow-hidden bg-gradient-to-br ${imageTone}`}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.85),transparent_34%)]" />
       <img
@@ -57,7 +57,7 @@ const WorkerCard = ({ worker, onClick, imageTone = 'from-sky-200 to-white' }) =>
         alt={worker.name}
         className="absolute inset-x-0 bottom-0 mx-auto h-44 w-44 rounded-[1.5rem] object-cover shadow-xl"
       />
-      <div className="absolute right-4 top-4 rounded-full bg-white/95 p-2 text-accent shadow">
+      <div className="absolute right-4 top-4 rounded-full bg-white/95 p-2 text-accent shadow dark:bg-slate-900/90">
         <AppIcon name="card" className="h-4 w-4" />
       </div>
     </div>
@@ -90,7 +90,7 @@ const WorkerCard = ({ worker, onClick, imageTone = 'from-sky-200 to-white' }) =>
 );
 
 const ProfessionalStrip = ({ worker, onClick }) => (
-  <button onClick={onClick} className="overflow-hidden rounded-[1.4rem] bg-white text-left shadow-[0_16px_35px_rgba(39,55,86,0.08)]">
+  <button onClick={onClick} className="overflow-hidden rounded-[1.4rem] bg-container text-left shadow-[0_16px_35px_rgba(39,55,86,0.08)]">
     <div className="h-48 overflow-hidden bg-gradient-to-br from-slate-800 via-slate-700 to-slate-500">
       <img src={resolveAvatar(worker.avatar, worker.name)} alt={worker.name} className="h-full w-full object-cover" />
     </div>
@@ -99,6 +99,30 @@ const ProfessionalStrip = ({ worker, onClick }) => (
       <p className="mt-1 text-lg font-bold text-text-primary">{worker.name}</p>
     </div>
   </button>
+);
+
+const ImageTintPanel = ({ image, tone, height = 'h-32', rounded = 'rounded-[1.25rem]' }) => (
+  <div className={`relative overflow-hidden ${rounded} ${height} bg-gradient-to-br ${tone}`}>
+    <img
+      src={image}
+      alt=""
+      aria-hidden="true"
+      className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-multiply"
+    />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_40%)]" />
+    <div className="absolute inset-0 bg-gradient-to-br from-white/24 via-transparent to-black/10 dark:from-slate-950/18 dark:to-slate-950/22" />
+  </div>
+);
+
+const PlainImagePanel = ({ image, height = 'h-32', rounded = 'rounded-[1.25rem]' }) => (
+  <div className={`relative overflow-hidden ${rounded} ${height} bg-container-secondary`}>
+    <img
+      src={image}
+      alt=""
+      aria-hidden="true"
+      className="h-full w-full object-cover"
+    />
+  </div>
 );
 
 const Landing = () => {
@@ -121,7 +145,7 @@ const Landing = () => {
 
   return (
     <main className="bg-background pb-24 text-text-primary md:pb-10">
-      <section className="relative overflow-hidden bg-[linear-gradient(90deg,#f3ede8_0%,#f3ebf7_100%)]">
+      <section className="relative overflow-hidden bg-[linear-gradient(90deg,#f3ede8_0%,#f3ebf7_100%)] dark:bg-[linear-gradient(90deg,#0f172a_0%,#1e1b2e_100%)]">
         <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-24 pt-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10 lg:pb-20 lg:pt-16">
           <div className="relative hidden lg:block">
             <div className="absolute left-8 top-24 grid grid-cols-6 gap-3 opacity-40">
@@ -129,26 +153,56 @@ const Landing = () => {
                 <span key={index} className="h-1.5 w-1.5 rounded-full bg-[#ffb9a4]" />
               ))}
             </div>
-            <div className="relative mx-auto mt-24 h-[500px] w-[500px] rounded-full bg-[#ece7e3]">
-              <div className="absolute inset-[22px] overflow-hidden rounded-full bg-white shadow-[0_24px_50px_rgba(39,55,86,0.08)]">
+            <div className="relative mx-auto mt-24 h-[500px] w-[500px] rounded-full bg-[#ece7e3] dark:bg-slate-800">
+              <div className="absolute inset-[22px] overflow-hidden rounded-full bg-white shadow-[0_24px_50px_rgba(39,55,86,0.08)] dark:bg-slate-900">
                 <img src="/images/hero-service.svg" alt="ATHAND cleaner" className="h-full w-full object-cover" />
               </div>
-              <div className="absolute left-8 top-[360px] flex items-center gap-4 rounded-[1.1rem] bg-white px-5 py-4 shadow-[0_18px_40px_rgba(39,55,86,0.12)]">
-                <span className="inline-flex h-14 w-14 items-center justify-center rounded-[1rem] bg-accent text-white">
-                  <AppIcon name="cleaning" className="h-7 w-7" />
-                </span>
+              <div className="absolute left-8 top-[360px] flex items-center gap-4 rounded-[1.1rem] bg-white px-5 py-4 shadow-[0_18px_40px_rgba(39,55,86,0.12)] dark:bg-slate-900">
+                <img
+                  src="/images/landing/category-cleaning.jpg"
+                  alt="Cleaning service"
+                  className="h-14 w-14 rounded-[1rem] object-cover"
+                />
                 <div>
                   <p className="text-sm font-bold text-text-primary">Cleaning Service</p>
-                  <div className="mt-1 flex items-center gap-1 text-accent">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <AppIcon key={index} name="star" className="h-3.5 w-3.5 fill-current stroke-current" />
-                    ))}
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {[
+                        '/images/landing/category-cleaning.jpg',
+                        '/images/landing/category-nanny.jpg',
+                        '/images/landing/category-electrician.jpg',
+                      ].map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt=""
+                          aria-hidden="true"
+                          className="h-6 w-6 rounded-full border-2 border-white object-cover dark:border-slate-900"
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs font-semibold text-accent">Top rated team</span>
                   </div>
                 </div>
               </div>
               <div className="absolute left-[360px] top-4 rounded-[1.4rem] bg-[#42bfe8] px-7 py-6 text-white shadow-[0_18px_40px_rgba(66,191,232,0.35)]">
                 <p className="text-[2.4rem] font-black leading-none">12,978</p>
                 <p className="mt-2 text-sm font-medium text-white/88">Happy Clients</p>
+                <div className="mt-4 flex -space-x-3">
+                  {[
+                    '/images/landing/category-moving.jpg',
+                    '/images/landing/category-cooking.jpg',
+                    '/images/landing/category-gardening.jpg',
+                  ].map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-9 w-9 rounded-full border-2 border-white/70 object-cover"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -157,16 +211,15 @@ const Landing = () => {
             <div className="w-full max-w-3xl">
               <h1 className="text-[3.4rem] font-black leading-[1.02] tracking-[-0.06em] text-text-primary sm:text-[4.4rem] lg:text-[5.2rem]">
                 One-stop Solution
-                <span className="block">for your <span className="text-accent">Services</span></span>
               </h1>
               <p className="mt-6 text-[1.65rem] font-medium text-text-primary">Order any service, anytime from anywhere</p>
 
-              <div className="mt-8 flex w-full max-w-4xl flex-col overflow-hidden rounded-[1rem] bg-white shadow-[0_22px_50px_rgba(39,55,86,0.08)] md:flex-row">
+              <div className="mt-8 flex w-full max-w-4xl flex-col overflow-hidden rounded-[1rem] bg-container shadow-[0_22px_50px_rgba(39,55,86,0.08)] md:flex-row">
                 <button onClick={() => navigate('/other-help')} className="flex items-center justify-between gap-3 bg-accent px-5 py-4 text-left text-white md:min-w-[180px]">
-                  <span className="text-lg font-semibold">New York</span>
+                  <span className="text-lg font-semibold">Lagos</span>
                   <AppIcon name="chevronDown" className="h-4 w-4" />
                 </button>
-                <button onClick={() => navigate('/other-help')} className="flex flex-1 items-center gap-3 px-5 py-4 text-left text-[#b1b1b1]">
+                <button onClick={() => navigate('/other-help')} className="flex flex-1 items-center gap-3 px-5 py-4 text-left text-text-tertiary">
                   <AppIcon name="search" className="h-4 w-4" />
                   <span className="text-sm">What are you look for</span>
                 </button>
@@ -178,7 +231,7 @@ const Landing = () => {
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <span className="text-sm font-semibold text-accent">Popular:</span>
                 {heroTags.map((tag) => (
-                  <button key={tag} onClick={() => navigate('/other-help')} className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#8f8f8f] shadow-sm">
+                  <button key={tag} onClick={() => navigate('/other-help')} className="rounded-lg bg-container px-4 py-2 text-sm font-medium text-text-secondary shadow-sm">
                     {tag}
                   </button>
                 ))}
@@ -188,7 +241,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <section className="bg-[#f7f3ef]">
+      <section className="bg-[#f7f3ef] dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-10">
           <SectionHeading
             title="Brows Category"
@@ -203,10 +256,13 @@ const Landing = () => {
                 onClick={() => navigate(`/category/${item.id}`)}
                 className={`rounded-[1.35rem] bg-gradient-to-br ${item.tone} p-0.5 text-left shadow-[0_16px_30px_rgba(39,55,86,0.08)] transition hover:-translate-y-1`}
               >
-                <div className="rounded-[1.25rem] bg-white/92 px-5 py-6">
-                  <div className={`inline-flex h-14 w-14 items-center justify-center rounded-[1rem] bg-gradient-to-br ${item.tone} text-white`}>
-                    <AppIcon name={item.icon} className="h-6 w-6" />
-                  </div>
+                <div className="rounded-[1.25rem] bg-white/92 px-5 py-6 dark:bg-slate-900/90">
+                  <PlainImagePanel image={item.image} />
+                  <img
+                    src={item.image}
+                    alt={item.label}
+                    className="h-14 w-14 rounded-[1rem] object-cover shadow-md"
+                  />
                   <p className="mt-5 text-lg font-bold text-text-primary">{item.label}</p>
                   <p className="mt-1 text-sm text-text-tertiary">{item.services}</p>
                 </div>
@@ -236,7 +292,7 @@ const Landing = () => {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10">
-        <div className="rounded-[2rem] bg-[#faf7f4] p-8 lg:p-10">
+        <div className="rounded-[2rem] bg-[#faf7f4] p-8 dark:bg-slate-900 lg:p-10">
           <h2 className="max-w-md text-[3rem] font-black leading-[1.02] tracking-[-0.05em] text-text-primary">
             Why you ChooseThis Marketplace?
           </h2>
@@ -249,9 +305,9 @@ const Landing = () => {
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           {valueCards.map((item) => (
-            <Card key={item.title} className="rounded-[1.6rem] border border-[#edf0f7] bg-[#f4f6fb]">
+            <Card key={item.title} className="rounded-[1.6rem] border border-border bg-[#f4f6fb] dark:bg-slate-800">
               <CardContent className="p-7">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary shadow">
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white text-primary shadow dark:bg-slate-900">
                   <AppIcon name={item.icon} className="h-6 w-6" />
                 </div>
                 <h3 className="mt-5 text-lg font-bold text-text-primary">{item.title}</h3>
@@ -299,7 +355,7 @@ const Landing = () => {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-8 lg:px-10">
-        <div className="grid items-center gap-8 rounded-[2rem] bg-[#eef5ea] p-8 lg:grid-cols-[0.96fr_1.04fr] lg:p-10">
+        <div className="grid items-center gap-8 rounded-[2rem] bg-[#eef5ea] p-8 dark:bg-slate-800 lg:grid-cols-[0.96fr_1.04fr] lg:p-10">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Start As Seller</p>
             <h2 className="mt-4 text-[2.7rem] font-black leading-[1.02] tracking-[-0.05em] text-text-primary">
@@ -313,10 +369,10 @@ const Landing = () => {
               <Button variant="outline" onClick={() => navigate('/admin')}>Admin Panel</Button>
             </div>
           </div>
-          <div className="overflow-hidden rounded-[1.6rem] bg-white shadow-[0_18px_40px_rgba(39,55,86,0.08)]">
+          <div className="overflow-hidden rounded-[1.6rem] bg-container shadow-[0_18px_40px_rgba(39,55,86,0.08)]">
             <div className="grid grid-cols-2 gap-0">
               {featuredWorkers.slice(0, 4).map((worker) => (
-                <div key={worker.id} className="border border-[#edf0f7] p-4">
+                <div key={worker.id} className="border border-border p-4">
                   <div className="h-36 overflow-hidden rounded-[1rem] bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500">
                     <img src={resolveAvatar(worker.avatar, worker.name)} alt={worker.name} className="h-full w-full object-cover" />
                   </div>
@@ -337,8 +393,8 @@ const Landing = () => {
         />
         <div className="grid gap-6 lg:grid-cols-3">
           {articleCards.map((article) => (
-            <Card key={article.title} className="overflow-hidden rounded-[1.6rem] border border-[#edf0f7] bg-white shadow-[0_16px_35px_rgba(39,55,86,0.08)]">
-              <div className={`h-44 bg-gradient-to-br ${article.tone}`} />
+            <Card key={article.title} className="overflow-hidden rounded-[1.6rem] border border-border bg-container shadow-[0_16px_35px_rgba(39,55,86,0.08)]">
+              <ImageTintPanel image={article.image} tone={article.tone} height="h-44" rounded="" />
               <CardContent className="p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{article.category}</p>
                 <h3 className="mt-3 text-xl font-bold leading-8 text-text-primary">{article.title}</h3>
@@ -351,7 +407,7 @@ const Landing = () => {
         </div>
       </section>
 
-      <footer className="border-t border-[#e9dfd5] bg-[#f7f3ef]">
+      <footer className="border-t border-border bg-[#f7f3ef] dark:bg-slate-900/40">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-8 md:grid-cols-4 lg:px-10">
           <div className="md:col-span-2">
             <p className="text-2xl font-black uppercase tracking-[0.24em] text-text-primary">ATHAND</p>

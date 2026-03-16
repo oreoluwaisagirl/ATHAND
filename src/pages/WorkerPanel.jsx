@@ -256,7 +256,7 @@ const WorkerPanel = () => {
                 </div>
                 <div className="space-y-4 pt-4">
                   {(bookingRows.length > 0 ? bookingRows : [
-                    { _id: 1, userId: { fullName: 'Riyad Hossain' }, status: 'completed', address: { city: 'New York' }, totalAmount: 1475 },
+                    { _id: 1, userId: { fullName: 'Riyad Hossain' }, status: 'completed', address: { city: 'Lagos' }, totalAmount: 1475 },
                     { _id: 2, userId: { fullName: 'Arafat Hossain' }, status: 'cancelled', address: { city: 'Oklahoma' }, totalAmount: 1370 },
                     { _id: 3, userId: { fullName: 'Shafiq Islam' }, status: 'pending', address: { city: 'Washington' }, totalAmount: 1365 },
                     { _id: 4, userId: { fullName: 'Sharif Ahmed' }, status: 'completed', address: { city: 'Barcelona' }, totalAmount: 1400 },

@@ -17,8 +17,8 @@ const Button = ({
     accent: 'bg-accent text-white hover:bg-accent-darker focus:ring-accent',
     success: 'bg-success text-white hover:brightness-95 focus:ring-success',
     danger: 'bg-error text-white hover:brightness-95 focus:ring-error',
-    outline: 'border border-border bg-white text-text-primary hover:border-primary hover:text-primary focus:ring-primary',
-    ghost: 'text-text-primary hover:bg-slate-100 focus:ring-primary',
+    outline: 'border border-border bg-container text-text-primary hover:border-primary hover:text-primary hover:bg-background-secondary focus:ring-primary',
+    ghost: 'text-text-primary hover:bg-background-secondary focus:ring-primary',
     dark: 'bg-dark text-white hover:bg-dark-lighter focus:ring-dark',
     darkOutline: 'border border-dark text-dark hover:bg-dark hover:text-white focus:ring-dark',
   };

@@ -189,7 +189,8 @@ router.post('/', authenticate, authorize('admin'), [
       email,
       phone,
       role: 'worker',
-      passwordHash: password || Math.random().toString(36).slice(-10)
+      passwordHash: password || Math.random().toString(36).slice(-10),
+      profilePhotoUrl: profilePhotoUrl || null,
     });
 
     const worker = await Worker.create({

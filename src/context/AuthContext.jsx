@@ -111,6 +111,14 @@ export const AuthProvider = ({ children }) => {
     return response.user;
   };
 
+  const loginWithEmailOtp = async ({ email, otpToken }) => {
+    const response = await authApi.emailLogin({ email: String(email || '').trim(), otpToken });
+    setToken(response.token);
+    setUser(response.user);
+    persistUser(response.user);
+    return response.user;
+  };
+
   const register = async ({ fullName, email, phone, password, role = 'user' }) => {
     const response = await authApi.register({ fullName, email, phone, password, role });
     setToken(response.token);
@@ -145,6 +153,7 @@ export const AuthProvider = ({ children }) => {
     isWorker,
     login,
     loginWithPhone,
+    loginWithEmailOtp,
     register,
     completeWorkerOnboarding,
     passwordReset,

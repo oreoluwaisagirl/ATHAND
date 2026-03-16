@@ -1,6 +1,6 @@
 const API_ORIGIN = import.meta.env.VITE_API_URL || '';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-  || (API_ORIGIN ? `${API_ORIGIN.replace(/\/+$/, '')}/api` : 'http://localhost:5000/api');
+  || (API_ORIGIN ? `${API_ORIGIN.replace(/\/+$/, '')}/api` : 'https://athand-1.onrender.coms/api');
 
 const TOKEN_KEY = 'athand_token';
 
@@ -73,6 +73,10 @@ export const authApi = {
     body: JSON.stringify(data),
   }),
   phoneLogin: (data) => apiRequest('/auth/phone-login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  emailLogin: (data) => apiRequest('/auth/email-login', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
