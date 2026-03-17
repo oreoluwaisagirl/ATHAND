@@ -28,6 +28,13 @@ export const workersApi = {
   },
 };
 
+export const servicesApi = {
+  list: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/services${query ? `?${query}` : ''}`);
+  },
+};
+
 export const adminApi = {
   stats: () => apiRequest('/admin/stats'),
   users: () => apiRequest('/users'),
@@ -56,4 +63,12 @@ export const bookingsApi = {
     method: 'PUT',
     body: JSON.stringify(payload),
   }),
+};
+
+export const paymentsApi = {
+  initialize: (payload) => apiRequest('/payments/initialize', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }),
+  verify: (reference) => apiRequest(`/payments/verify/${reference}`),
 };

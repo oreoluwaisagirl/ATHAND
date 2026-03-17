@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { resolveAvatar } from '../lib/avatars';
 import { useAuth } from './AuthContext';
-import { adminApi, workersApi } from '../lib/dataApi';
+import { adminApi, bookingsApi, workersApi } from '../lib/dataApi';
 
 const DataContext = createContext(null);
 
@@ -182,6 +182,9 @@ export const DataProvider = ({ children }) => {
           ]);
           setUsers(Array.isArray(usersResponse?.data) ? usersResponse.data : []);
           setBookings(Array.isArray(bookingsResponse?.data) ? bookingsResponse.data : []);
+        } else if (isAuthenticated) {
+          const bookingsResponse = await bookingsApi.myBookings();
+          setBookings(Array.isArray(bookingsResponse?.data) ? bookingsResponse.data : []);
         }
 
         setSyncStatus({ backendConnected: true, lastSyncAt: new Date().toISOString() });
@@ -313,7 +316,14 @@ export const DataProvider = ({ children }) => {
   };
 
   const updateBooking = (bookingId, updates) => {
-    setBookings((prev) => prev.map((b) => (String(b.id) === String(bookingId) ? { ...b, ...updates } : b)));
+    setBookings((prev) => {
+      const next = prev.map((booking) =>
+        String(booking.id || booking._id) === String(bookingId) ? { ...booking, ...updates } : booking
+      );
+
+      const exists = next.some((booking) => String(booking.id || booking._id) === String(bookingId));
+      return exists ? next : [...next, updates];
+    });
   };
 
   const addMessage = (message) => {

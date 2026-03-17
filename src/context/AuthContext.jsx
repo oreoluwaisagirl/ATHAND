@@ -116,11 +116,11 @@ export const AuthProvider = ({ children }) => {
     setToken(response.token);
     setUser(response.user);
     persistUser(response.user);
-    return response.user;
+    return response;
   };
 
-  const register = async ({ fullName, email, phone, password, role = 'user' }) => {
-    const response = await authApi.register({ fullName, email, phone, password, role });
+  const register = async ({ fullName, email, phone, password, role = 'user', otpToken }) => {
+    const response = await authApi.register({ fullName, email, phone, password, role, otpToken });
     setToken(response.token);
     setUser(response.user);
     persistUser(response.user);

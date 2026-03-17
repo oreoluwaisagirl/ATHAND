@@ -421,8 +421,20 @@ router.post('/phone-login', [
       throw new AppError('Account is deactivated', 403);
     }
 
+    if (isWorkerEmail(email) && user.role !== 'worker') {
+      user.role = 'worker';
+    }
+
     user.lastLogin = new Date();
     await user.save();
+
+    let workerProfile = null;
+    if (user.role === 'worker') {
+      workerProfile = await Worker.findOne({ userId: user._id });
+      if (!workerProfile) {
+        workerProfile = await Worker.create({ userId: user._id, onboardingCompleted: false });
+      }
+    }
 
     const token = generateToken(user._id);
 
@@ -430,6 +442,8 @@ router.post('/phone-login', [
       success: true,
       token,
       user: user.toJSON(),
+      ...(workerProfile && { worker: workerProfile }),
+      requiresWorkerOnboarding: user.role === 'worker' && !isWorkerOnboardingComplete(workerProfile),
     });
   } catch (error) {
     next(error);
@@ -482,6 +496,7 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('fullName').trim().notEmpty(),
   body('phone').trim().notEmpty(),
+  body('otpToken').notEmpty(),
 ], async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -489,9 +504,11 @@ router.post('/register', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, fullName, role } = req.body;
+    const { email, password, fullName, role, otpToken } = req.body;
 
     const phone = normalizePhone(req.body.phone);
+
+    validateOtpSessionToken({ token: otpToken, expectedPurpose: 'signup', email });
 
     const existingUser = await User.findOne({
       $or: [{ email }, { phone }],

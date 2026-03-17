@@ -8,7 +8,7 @@ import { resolveAvatar } from '../lib/avatars';
 
 const BookingConfirmation = () => {
   const navigate = useNavigate();
-  const { getAllWorkers, addBooking } = useData();
+  const { getAllWorkers } = useData();
   const [paymentMethod, setPaymentMethod] = useState('bank-transfer');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
@@ -24,30 +24,19 @@ const BookingConfirmation = () => {
 
   const total = provider.rate * 4;
 
-  const handleConfirmBooking = () => {
+  const handleProceed = () => {
     if (!agreeToTerms) {
       alert('Please agree to terms to continue.');
       return;
     }
-
-    addBooking({
-      workerId: provider.id,
-      serviceType: provider.categoryId,
-      scheduledDate: new Date().toISOString(),
-      status: 'confirmed',
-      paymentMethod,
-      total,
-    });
-
-    alert('Booking confirmed successfully.');
-    navigate('/profile');
+    navigate('/booking', { state: { worker: provider, paymentMethod } });
   };
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="bg-container shadow-sm px-4 py-3 flex items-center justify-between border-b border-border">
         <button onClick={() => navigate('/booking-location')} className="text-text-secondary hover:text-text-primary">←</button>
-        <h1 className="text-xl font-semibold text-text-primary">Confirm Booking</h1>
+        <h1 className="text-xl font-semibold text-text-primary">Review Booking</h1>
         <div className="w-8" />
       </div>
 
@@ -79,7 +68,7 @@ const BookingConfirmation = () => {
           <CardContent className="space-y-3">
             <label className="flex items-center space-x-3 p-3 border border-border rounded-lg cursor-pointer">
               <input type="radio" name="payment" value="bank-transfer" checked={paymentMethod === 'bank-transfer'} onChange={(e) => setPaymentMethod(e.target.value)} />
-              <div className="text-text-primary">Bank Transfer</div>
+              <div className="text-text-primary">Paystack Checkout</div>
             </label>
             <label className="flex items-center space-x-3 p-3 border border-border rounded-lg cursor-pointer">
               <input type="radio" name="payment" value="cash" checked={paymentMethod === 'cash'} onChange={(e) => setPaymentMethod(e.target.value)} />
@@ -101,7 +90,7 @@ const BookingConfirmation = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-container border-t border-border p-4 md:static md:mt-6 md:mx-auto md:max-w-3xl md:rounded-lg md:border">
         <div className="flex space-x-3">
           <Button variant="outline" onClick={() => navigate('/booking-location')} className="flex-1">Back</Button>
-          <Button onClick={handleConfirmBooking} className="flex-1" disabled={!agreeToTerms}>Confirm Booking</Button>
+          <Button onClick={handleProceed} className="flex-1" disabled={!agreeToTerms}>Continue to Checkout</Button>
         </div>
       </div>
     </div>

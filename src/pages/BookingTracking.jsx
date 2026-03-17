@@ -21,7 +21,7 @@ const BookingTracking = () => {
   const { bookings, updateBooking } = useData();
 
   const booking = useMemo(
-    () => bookings.find((item) => String(item.id || item._id) === String(bookingId)) || bookings[0] || null,
+    () => bookings.find((item) => String(item.id || item._id) === String(bookingId)) || null,
     [bookings, bookingId]
   );
 

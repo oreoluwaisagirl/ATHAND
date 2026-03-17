@@ -19,6 +19,7 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import HelpCenter from './pages/HelpCenter';
 import PaymentMethods from './pages/PaymentMethods';
+import PaymentCallback from './pages/PaymentCallback';
 import NotificationSettings from './pages/NotificationSettings';
 import LanguageRegion from './pages/LanguageRegion';
 import TermsOfService from './pages/TermsOfService';
@@ -75,6 +76,7 @@ function App() {
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/help-center" element={<HelpCenter />} />
                 <Route path="/payment-methods" element={<PaymentMethods />} />
+                <Route path="/payment-callback" element={<PaymentCallback />} />
                 <Route path="/notification-settings" element={<NotificationSettings />} />
                 <Route path="/language-region" element={<LanguageRegion />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />

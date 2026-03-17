@@ -30,15 +30,25 @@ const articleCards = [
   { title: 'What users expect from service booking interfaces', category: 'Product', tone: 'from-[#ef6ca7] to-[#ff9dc4]', image: '/images/landing/category-moving.jpg' },
 ];
 
-const SectionHeading = ({ title, accent, actionLabel, onAction }) => (
+const serviceImageFallback = '/images/hero-service.svg';
+
+const handleImageFallback = (event, fallback = serviceImageFallback) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = fallback;
+};
+
+const SectionHeading = ({ title, accent, description, actionLabel, onAction }) => (
   <div className="mb-8 flex items-end justify-between gap-4">
     <div>
       <h2 className="text-[2rem] font-black tracking-[-0.04em] text-text-primary sm:text-[2.35rem]">
         {title}{accent ? <> <span className="text-primary">{accent}</span></> : null}
       </h2>
-      <p className="mt-3 max-w-xl text-sm leading-7 text-text-tertiary">
-        It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.
-      </p>
+      {description ? (
+        <p className="mt-3 max-w-xl text-sm leading-7 text-text-tertiary">
+          {description}
+        </p>
+      ) : null}
     </div>
     {actionLabel ? (
       <button onClick={onAction} className="hidden text-sm font-semibold text-text-secondary transition hover:text-primary lg:block">
@@ -56,6 +66,7 @@ const WorkerCard = ({ worker, onClick, imageTone = 'from-sky-200 to-white' }) =>
         src={resolveAvatar(worker.avatar, worker.name)}
         alt={worker.name}
         className="absolute inset-x-0 bottom-0 mx-auto h-44 w-44 rounded-[1.5rem] object-cover shadow-xl"
+        onError={(event) => handleImageFallback(event, '/images/provider-fallback.svg')}
       />
       <div className="absolute right-4 top-4 rounded-full bg-white/95 p-2 text-accent shadow dark:bg-slate-900/90">
         <AppIcon name="card" className="h-4 w-4" />
@@ -68,6 +79,7 @@ const WorkerCard = ({ worker, onClick, imageTone = 'from-sky-200 to-white' }) =>
             src={resolveAvatar(worker.avatar, `${worker.name}-mini`)}
             alt={worker.name}
             className="h-6 w-6 rounded-full object-cover"
+            onError={(event) => handleImageFallback(event, '/images/provider-fallback.svg')}
           />
           <span>{worker.location}</span>
         </div>
@@ -92,7 +104,12 @@ const WorkerCard = ({ worker, onClick, imageTone = 'from-sky-200 to-white' }) =>
 const ProfessionalStrip = ({ worker, onClick }) => (
   <button onClick={onClick} className="overflow-hidden rounded-[1.4rem] bg-container text-left shadow-[0_16px_35px_rgba(39,55,86,0.08)]">
     <div className="h-48 overflow-hidden bg-gradient-to-br from-slate-800 via-slate-700 to-slate-500">
-      <img src={resolveAvatar(worker.avatar, worker.name)} alt={worker.name} className="h-full w-full object-cover" />
+      <img
+        src={resolveAvatar(worker.avatar, worker.name)}
+        alt={worker.name}
+        className="h-full w-full object-cover"
+        onError={(event) => handleImageFallback(event, '/images/provider-fallback.svg')}
+      />
     </div>
     <div className="p-4">
       <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">{worker.categoryId}</p>
@@ -108,6 +125,7 @@ const ImageTintPanel = ({ image, tone, height = 'h-32', rounded = 'rounded-[1.25
       alt=""
       aria-hidden="true"
       className="absolute inset-0 h-full w-full object-cover opacity-30 mix-blend-multiply"
+      onError={(event) => handleImageFallback(event)}
     />
     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.35),transparent_40%)] dark:bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_40%)]" />
     <div className="absolute inset-0 bg-gradient-to-br from-white/24 via-transparent to-black/10 dark:from-slate-950/18 dark:to-slate-950/22" />
@@ -121,6 +139,7 @@ const PlainImagePanel = ({ image, height = 'h-32', rounded = 'rounded-[1.25rem]'
       alt=""
       aria-hidden="true"
       className="h-full w-full object-cover"
+      onError={(event) => handleImageFallback(event)}
     />
   </div>
 );
@@ -155,13 +174,14 @@ const Landing = () => {
             </div>
             <div className="relative mx-auto mt-24 h-[500px] w-[500px] rounded-full bg-[#ece7e3] dark:bg-slate-800">
               <div className="absolute inset-[22px] overflow-hidden rounded-full bg-white shadow-[0_24px_50px_rgba(39,55,86,0.08)] dark:bg-slate-900">
-                <img src="/images/hero-service.svg" alt="ATHAND cleaner" className="h-full w-full object-cover" />
+                <img src="/images/hero-service.svg" alt="ATHAND cleaner" className="h-full w-full object-cover" onError={(event) => handleImageFallback(event)} />
               </div>
               <div className="absolute left-8 top-[360px] flex items-center gap-4 rounded-[1.1rem] bg-white px-5 py-4 shadow-[0_18px_40px_rgba(39,55,86,0.12)] dark:bg-slate-900">
                 <img
                   src="/images/landing/category-cleaning.jpg"
                   alt="Cleaning service"
                   className="h-14 w-14 rounded-[1rem] object-cover"
+                  onError={(event) => handleImageFallback(event)}
                 />
                 <div>
                   <p className="text-sm font-bold text-text-primary">Cleaning Service</p>
@@ -178,6 +198,7 @@ const Landing = () => {
                           alt=""
                           aria-hidden="true"
                           className="h-6 w-6 rounded-full border-2 border-white object-cover dark:border-slate-900"
+                          onError={(event) => handleImageFallback(event)}
                         />
                       ))}
                     </div>
@@ -200,6 +221,7 @@ const Landing = () => {
                       alt=""
                       aria-hidden="true"
                       className="h-9 w-9 rounded-full border-2 border-white/70 object-cover"
+                      onError={(event) => handleImageFallback(event)}
                     />
                   ))}
                 </div>
@@ -244,8 +266,9 @@ const Landing = () => {
       <section className="bg-[#f7f3ef] dark:bg-slate-900/40">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-10">
           <SectionHeading
-            title="Brows Category"
+            title="Browse Categories"
             accent=""
+            description="Browse the core service categories available on ATHAND and jump straight into providers near you."
             actionLabel="Explore All →"
             onAction={() => navigate('/other-help')}
           />
@@ -262,6 +285,7 @@ const Landing = () => {
                     src={item.image}
                     alt={item.label}
                     className="h-14 w-14 rounded-[1rem] object-cover shadow-md"
+                    onError={(event) => handleImageFallback(event)}
                   />
                   <p className="mt-5 text-lg font-bold text-text-primary">{item.label}</p>
                   <p className="mt-1 text-sm text-text-tertiary">{item.services}</p>
@@ -274,8 +298,9 @@ const Landing = () => {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8 lg:px-10">
         <SectionHeading
-            title="Featured Services"
-            accent=""
+          title="Featured Services"
+          accent=""
+          description="These workers stand out for strong ratings, reliable availability, and profiles that are ready for booking."
           actionLabel="Explore All →"
           onAction={() => navigate('/house-help-search')}
         />
@@ -294,13 +319,13 @@ const Landing = () => {
       <section className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-10">
         <div className="rounded-[2rem] bg-[#faf7f4] p-8 dark:bg-slate-900 lg:p-10">
           <h2 className="max-w-md text-[3rem] font-black leading-[1.02] tracking-[-0.05em] text-text-primary">
-            Why you ChooseThis Marketplace?
+            Why ATHAND works for everyday home services
           </h2>
           <p className="mt-6 text-sm leading-8 text-text-secondary">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in rutrum odio, a blandit leo. Mauris placerat vulputate lacus eu eleifend. Donec euismod, metus id consequat egestas, tellus dui fermentum est.
+            ATHAND brings trusted workers, transparent pricing, and location-aware availability into one booking flow so customers can move from search to confirmation without friction.
           </p>
           <Button variant="accent" className="mt-8 rounded-md px-6" onClick={() => navigate('/worker-onboarding')}>
-            Become A Seller
+            Become a Provider
           </Button>
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -322,6 +347,7 @@ const Landing = () => {
         <SectionHeading
           title="Popular Services"
           accent=""
+          description="See the services customers book most often across the marketplace right now."
           actionLabel="Explore All →"
           onAction={() => navigate('/house-help-search')}
         />
@@ -341,6 +367,7 @@ const Landing = () => {
         <SectionHeading
           title="Popular"
           accent="Professional Service"
+          description="A quick view of trusted professionals with solid reviews and broad service coverage."
           actionLabel=""
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
@@ -359,10 +386,10 @@ const Landing = () => {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Start As Seller</p>
             <h2 className="mt-4 text-[2.7rem] font-black leading-[1.02] tracking-[-0.05em] text-text-primary">
-              Add workers and keep your marketplace full.
+              Grow supply with verified professionals across Lagos.
             </h2>
             <p className="mt-5 max-w-xl text-sm leading-8 text-text-secondary">
-              The backend now has seeded workers and service mappings, so the polished homepage can also be backed by real operational data when you present.
+              Bring more workers onto the platform, keep service categories well covered, and give customers stronger options when they search nearby providers.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button variant="accent" onClick={() => navigate('/worker-onboarding')}>Start Onboarding</Button>
@@ -374,7 +401,12 @@ const Landing = () => {
               {featuredWorkers.slice(0, 4).map((worker) => (
                 <div key={worker.id} className="border border-border p-4">
                   <div className="h-36 overflow-hidden rounded-[1rem] bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500">
-                    <img src={resolveAvatar(worker.avatar, worker.name)} alt={worker.name} className="h-full w-full object-cover" />
+                    <img
+                      src={resolveAvatar(worker.avatar, worker.name)}
+                      alt={worker.name}
+                      className="h-full w-full object-cover"
+                      onError={(event) => handleImageFallback(event, '/images/provider-fallback.svg')}
+                    />
                   </div>
                   <p className="mt-3 text-sm font-bold text-text-primary">{worker.name}</p>
                   <p className="text-xs text-text-tertiary">{worker.categoryId} • {worker.location}</p>
@@ -389,6 +421,7 @@ const Landing = () => {
         <SectionHeading
           title="Recent Blog"
           accent="& Articles"
+          description="Marketplace insights, trust signals, and service design notes that support the ATHAND product story."
           actionLabel=""
         />
         <div className="grid gap-6 lg:grid-cols-3">
