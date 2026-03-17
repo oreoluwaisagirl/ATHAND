@@ -1,90 +1,94 @@
-import nodemailer from 'nodemailer';
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+const BREVO_TIMEOUT_MS = parseInt(process.env.BREVO_TIMEOUT_MS || '15000', 10);
 
-const SMTP_CONNECTION_TIMEOUT = parseInt(process.env.SMTP_CONNECTION_TIMEOUT || '15000', 10);
-const SMTP_GREETING_TIMEOUT = parseInt(process.env.SMTP_GREETING_TIMEOUT || '10000', 10);
-const SMTP_SOCKET_TIMEOUT = parseInt(process.env.SMTP_SOCKET_TIMEOUT || '20000', 10);
+const parseSender = () => {
+  const fallbackEmail = 'noreply@athand.com';
+  const fallbackName = 'ATHAND';
+  const rawFrom = String(process.env.EMAIL_FROM || '').trim();
+  const explicitName = String(process.env.EMAIL_FROM_NAME || '').trim();
 
-const classifyEmailError = (error) => {
-  const code = String(error?.code || '');
-  const responseCode = Number(error?.responseCode || 0);
-  const message = String(error?.message || '').toLowerCase();
-
-  if (code === 'ETIMEDOUT' || message.includes('connection timeout') || message.includes('greeting never received')) {
-    return 'SMTP connection timeout';
+  const match = rawFrom.match(/^(.*)<(.+)>$/);
+  if (match) {
+    return {
+      name: explicitName || match[1].trim().replace(/^"|"$/g, '') || fallbackName,
+      email: match[2].trim(),
+    };
   }
 
-  if (code === 'ESOCKET' && message.includes('timeout')) {
-    return 'SMTP socket timeout';
+  return {
+    name: explicitName || fallbackName,
+    email: rawFrom || fallbackEmail,
+  };
+};
+
+const classifyBrevoError = ({ status = 0, payload = null, error = null }) => {
+  const message = String(payload?.message || error?.message || '').toLowerCase();
+
+  if (error?.name === 'AbortError' || message.includes('timed out')) {
+    return 'Brevo API timeout';
   }
 
-  if (
-    code === 'EAUTH'
-    || responseCode === 535
-    || responseCode === 534
-    || message.includes('invalid login')
-    || message.includes('authentication unsuccessful')
-    || message.includes('bad credentials')
-    || message.includes('auth')
-  ) {
+  if (status === 401 || status === 403 || message.includes('api key')) {
     return 'Brevo auth failed';
   }
 
-  if (
-    responseCode === 550
-    || responseCode === 553
-    || message.includes('sender')
-    || message.includes('not verified')
-    || message.includes('rejected')
-  ) {
-    return 'SMTP sender rejected';
+  if (status === 400 && (message.includes('sender') || message.includes('from'))) {
+    return 'Brevo sender rejected';
   }
 
-  return error?.message || 'Email delivery failed';
-};
-
-// Create transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: false,
-    connectionTimeout: SMTP_CONNECTION_TIMEOUT,
-    greetingTimeout: SMTP_GREETING_TIMEOUT,
-    socketTimeout: SMTP_SOCKET_TIMEOUT,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
+  return payload?.message || error?.message || 'Brevo email delivery failed';
 };
 
 // Send email
 export const sendEmail = async ({ to, subject, text, html }) => {
+  const apiKey = String(process.env.BREVO_API_KEY || '').trim();
+  if (!apiKey) {
+    return { success: false, error: 'BREVO_API_KEY is missing' };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), BREVO_TIMEOUT_MS);
+
   try {
-    const transporter = createTransporter();
-    await transporter.verify();
-    
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'ATHAND <noreply@athand.com>',
-      to,
-      subject,
-      text,
-      html
+    const sender = parseSender();
+    const response = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey,
+      },
+      body: JSON.stringify({
+        sender,
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+        textContent: text,
+      }),
+      signal: controller.signal,
     });
 
-    console.log(`Email sent: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const classifiedError = classifyBrevoError({ status: response.status, payload });
+      console.error('Brevo email error:', {
+        status: response.status,
+        payload,
+        classifiedError,
+      });
+      return { success: false, error: classifiedError };
+    }
+
+    console.log(`Email sent: ${payload.messageId}`);
+    return { success: true, messageId: payload.messageId };
   } catch (error) {
-    const classifiedError = classifyEmailError(error);
-    console.error('Email error:', {
+    const classifiedError = classifyBrevoError({ error });
+    console.error('Brevo email error:', {
       message: error?.message,
-      code: error?.code,
-      response: error?.response,
-      responseCode: error?.responseCode,
-      command: error?.command,
       classifiedError,
     });
     return { success: false, error: classifiedError };
+  } finally {
+    clearTimeout(timeout);
   }
 };
 
