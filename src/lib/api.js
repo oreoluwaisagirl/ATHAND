@@ -64,23 +64,7 @@ export const authApi = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  requestOtp: (data) => apiRequest('/auth/otp/request', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  verifyOtp: (data) => apiRequest('/auth/otp/verify', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
   passwordReset: (data) => apiRequest('/auth/password-reset', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  phoneLogin: (data) => apiRequest('/auth/phone-login', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  }),
-  emailLogin: (data) => apiRequest('/auth/email-login', {
     method: 'POST',
     body: JSON.stringify(data),
   }),

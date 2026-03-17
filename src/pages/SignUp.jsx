@@ -16,7 +16,7 @@ const PendingRequestView = ({ email }) => (
         <p className="mt-6 text-sm font-semibold uppercase tracking-[0.24em] text-primary">Request Pending</p>
         <h1 className="mt-4 text-4xl font-black tracking-[-0.05em] text-text-primary">Your provider request is under review.</h1>
         <p className="mx-auto mt-5 max-w-xl text-base leading-8 text-text-secondary">
-          ATHAND has received your service provider application. An admin must review and verify the request before your worker account is created.
+          ATHAND has received your service provider application. An admin must review and approve the request before your worker account is created.
         </p>
         <div className="mt-8 rounded-[1.4rem] border border-[#e8efe3] bg-[#f6faf3] px-5 py-4 text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-tertiary">What happens next</p>
@@ -37,7 +37,7 @@ const PendingRequestView = ({ email }) => (
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { register, requestProviderSignup, requestOtp, verifyOtp } = useAuth();
+  const { register, requestProviderSignup } = useAuth();
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -47,107 +47,38 @@ const SignUp = () => {
     confirmPassword: '',
     role: 'user',
   });
-  const [code, setCode] = useState('');
-  const [otpRequested, setOtpRequested] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpToken, setOtpToken] = useState('');
   const [requestPending, setRequestPending] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
 
   const onChange = (field) => (event) => {
     setFormData((prev) => ({ ...prev, [field]: event.target.value }));
-    if (field === 'email') {
-      setOtpRequested(false);
-      setOtpVerified(false);
-      setOtpToken('');
-      setCode('');
-    }
   };
 
   const validateForm = () => {
     if (!formData.fullName || !formData.email || !formData.phone || !formData.password) {
       return 'All fields are required.';
     }
-
     if (formData.password.length < 6) {
       return 'Password must be at least 6 characters.';
     }
-
     if (formData.password !== formData.confirmPassword) {
       return 'Passwords do not match.';
     }
-
     if (!agreeToTerms) {
       return 'You must agree to the terms to continue.';
     }
-
     return '';
-  };
-
-  const handleRequestOtp = async (event) => {
-    event.preventDefault();
-    setError('');
-    setMessage('');
-
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      await requestOtp({ email: formData.email, purpose: 'signup' });
-      setOtpRequested(true);
-      setOtpVerified(false);
-      setOtpToken('');
-      setMessage(`A verification code has been sent to ${formData.email}.`);
-    } catch (err) {
-      setError(err?.message || 'Unable to send signup OTP.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleVerifyOtp = async (event) => {
-    event.preventDefault();
-    setError('');
-    setMessage('');
-
-    if (!code) {
-      setError('Enter the OTP sent to your email.');
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const token = await verifyOtp({ email: formData.email, purpose: 'signup', code });
-      setOtpToken(token);
-      setOtpVerified(true);
-      setMessage('Email verified. You can now finish signup.');
-    } catch (err) {
-      setError(err?.message || 'Unable to verify signup OTP.');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
-    setMessage('');
 
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
-      return;
-    }
-
-    if (!otpToken) {
-      setError('Verify your email OTP before continuing.');
       return;
     }
 
@@ -160,7 +91,6 @@ const SignUp = () => {
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
-          otpToken,
         });
         setRequestPending(true);
         return;
@@ -172,7 +102,6 @@ const SignUp = () => {
         phone: formData.phone,
         password: formData.password,
         role: formData.role,
-        otpToken,
       });
 
       if (response?.requiresWorkerOnboarding) {
@@ -195,7 +124,7 @@ const SignUp = () => {
     <InteriorPage
       kicker="Create Account"
       title="Join ATHAND with the same home-page visual system."
-      description="Email verification now sits directly inside signup so customers can register immediately while provider requests pause for admin review."
+      description="Customers can create accounts immediately with password sign up, while provider applications still pause for admin review."
       badge="Choose customer or provider access"
       backLabel="Back Home"
       backTo="/"
@@ -207,8 +136,8 @@ const SignUp = () => {
           </div>
           {[
             ['worker', 'Provider requests pause for admin approval'],
-            ['calendar', 'Customers can start booking right after verification'],
-            ['lock', 'Email OTP verification happens before account creation'],
+            ['calendar', 'Customers can start booking right away'],
+            ['lock', 'Standard password-based signup and sign in'],
           ].map(([icon, text]) => (
             <div key={text} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f7f3ef] text-text-primary">
@@ -269,31 +198,6 @@ const SignUp = () => {
                 </span>
               </label>
 
-              <div className="sm:col-span-2 grid gap-3 sm:grid-cols-[1fr_auto]">
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter email OTP"
-                  className="w-full rounded-2xl border border-[#eadfd6] bg-[#faf7f4] px-4 py-3.5 outline-none transition focus:border-accent"
-                />
-                <Button type="button" variant="outline" className="rounded-xl" disabled={isSubmitting} onClick={handleRequestOtp}>
-                  {isSubmitting && !otpRequested ? 'Sending...' : otpRequested ? 'Resend OTP' : 'Send OTP'}
-                </Button>
-              </div>
-
-              <div className="sm:col-span-2">
-                <Button type="button" variant="outline" className="w-full rounded-xl" disabled={isSubmitting || !otpRequested} onClick={handleVerifyOtp}>
-                  {isSubmitting ? 'Verifying...' : otpVerified ? 'OTP Verified' : 'Verify OTP'}
-                </Button>
-              </div>
-
-              {message ? (
-                <p className="sm:col-span-2 rounded-2xl border border-[#d9ead7] bg-[#eef7ed] px-4 py-3 text-sm text-text-primary">
-                  {message}
-                </p>
-              ) : null}
-
               {error ? (
                 <p className="sm:col-span-2 rounded-2xl border border-error bg-error-light px-4 py-3 text-sm text-text-primary">
                   {error}
@@ -301,7 +205,7 @@ const SignUp = () => {
               ) : null}
 
               <div className="sm:col-span-2">
-                <Button type="submit" className="w-full rounded-xl" size="lg" disabled={isSubmitting || !otpVerified}>
+                <Button type="submit" className="w-full rounded-xl" size="lg" disabled={isSubmitting}>
                   {isSubmitting ? 'Submitting...' : formData.role === 'worker' ? 'Request Provider Access' : 'Create Account'}
                 </Button>
               </div>
@@ -326,7 +230,7 @@ const SignUp = () => {
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Before you continue</p>
               <div className="mt-4 space-y-3">
                 {[
-                  'Verify the email address you want tied to your account',
+                  'Choose the right account type',
                   'Provider requests require admin approval before sign in',
                   'Keep your password at least 6 characters',
                 ].map((item) => (

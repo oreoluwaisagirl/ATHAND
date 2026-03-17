@@ -498,7 +498,6 @@ router.post('/register', [
   body('password').isLength({ min: 6 }),
   body('fullName').trim().notEmpty(),
   body('phone').trim().notEmpty(),
-  body('otpToken').notEmpty(),
 ], async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -506,11 +505,9 @@ router.post('/register', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, fullName, role, otpToken } = req.body;
+    const { email, password, fullName, role } = req.body;
 
     const phone = normalizePhone(req.body.phone);
-
-    validateOtpSessionToken({ token: otpToken, expectedPurpose: 'signup', email });
 
     const existingUser = await User.findOne({
       $or: [{ email }, { phone }],
@@ -555,7 +552,6 @@ router.post('/provider-signup-request', [
   body('password').isLength({ min: 6 }),
   body('fullName').trim().notEmpty(),
   body('phone').trim().notEmpty(),
-  body('otpToken').notEmpty(),
 ], async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -563,10 +559,8 @@ router.post('/provider-signup-request', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, fullName, otpToken } = req.body;
+    const { email, password, fullName } = req.body;
     const phone = normalizePhone(req.body.phone);
-
-    validateOtpSessionToken({ token: otpToken, expectedPurpose: 'signup', email });
 
     const existingUser = await User.findOne({
       $or: [{ email }, { phone }],

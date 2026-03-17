@@ -25,7 +25,6 @@ import LanguageRegion from './pages/LanguageRegion';
 import TermsOfService from './pages/TermsOfService';
 import AboutATHAND from './pages/AboutATHAND';
 import AdminPanel from './pages/AdminPanel';
-import OtpDebug from './pages/OtpDebug';
 import WorkerPanel from './pages/WorkerPanel';
 import WorkerOnboarding from './pages/WorkerOnboarding';
 import EmergencyHelp from './pages/EmergencyHelp';
@@ -84,7 +83,6 @@ function App() {
                 <Route path="/admin" element={<AdminPanel />} />
                 <Route path="/worker-panel" element={<WorkerPanel />} />
                 <Route path="/worker-onboarding" element={<WorkerOnboarding />} />
-                <Route path="/otp-test" element={<OtpDebug />} />
               </Routes>
               <BottomNavigation />
               <CommandCenter />

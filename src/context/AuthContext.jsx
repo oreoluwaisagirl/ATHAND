@@ -85,50 +85,16 @@ export const AuthProvider = ({ children }) => {
     return localUser;
   };
 
-  const requestOtp = async ({ phone, email, purpose }) => {
-    return authApi.requestOtp({
-      purpose,
-      ...(phone ? { phone: String(phone).trim() } : {}),
-      ...(email ? { email: String(email).trim() } : {}),
-    });
-  };
-
-  const verifyOtp = async ({ phone, email, purpose, code }) => {
-    const response = await authApi.verifyOtp({
-      purpose,
-      code: String(code || '').trim(),
-      ...(phone ? { phone: String(phone).trim() } : {}),
-      ...(email ? { email: String(email).trim() } : {}),
-    });
-    return response?.otpToken;
-  };
-
-  const loginWithPhone = async ({ phone, otpToken }) => {
-    const response = await authApi.phoneLogin({ phone: String(phone || '').trim(), otpToken });
-    setToken(response.token);
-    setUser(response.user);
-    persistUser(response.user);
-    return response.user;
-  };
-
-  const loginWithEmailOtp = async ({ email, otpToken }) => {
-    const response = await authApi.emailLogin({ email: String(email || '').trim(), otpToken });
+  const register = async ({ fullName, email, phone, password, role = 'user' }) => {
+    const response = await authApi.register({ fullName, email, phone, password, role });
     setToken(response.token);
     setUser(response.user);
     persistUser(response.user);
     return response;
   };
 
-  const register = async ({ fullName, email, phone, password, role = 'user', otpToken }) => {
-    const response = await authApi.register({ fullName, email, phone, password, role, otpToken });
-    setToken(response.token);
-    setUser(response.user);
-    persistUser(response.user);
-    return response;
-  };
-
-  const requestProviderSignup = async ({ fullName, email, phone, password, otpToken }) => {
-    return authApi.requestProviderSignup({ fullName, email, phone, password, otpToken });
+  const requestProviderSignup = async ({ fullName, email, phone, password }) => {
+    return authApi.requestProviderSignup({ fullName, email, phone, password });
   };
 
   const completeWorkerOnboarding = async (payload) => {
@@ -156,14 +122,10 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     isWorker,
     login,
-    loginWithPhone,
-    loginWithEmailOtp,
     register,
     requestProviderSignup,
     completeWorkerOnboarding,
     passwordReset,
-    requestOtp,
-    verifyOtp,
     logout,
     adminEmail: ADMIN_EMAIL,
   }), [user, isLoading, isAdmin, isWorker]);
