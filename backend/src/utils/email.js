@@ -1,11 +1,56 @@
 import nodemailer from 'nodemailer';
 
+const SMTP_CONNECTION_TIMEOUT = parseInt(process.env.SMTP_CONNECTION_TIMEOUT || '15000', 10);
+const SMTP_GREETING_TIMEOUT = parseInt(process.env.SMTP_GREETING_TIMEOUT || '10000', 10);
+const SMTP_SOCKET_TIMEOUT = parseInt(process.env.SMTP_SOCKET_TIMEOUT || '20000', 10);
+
+const classifyEmailError = (error) => {
+  const code = String(error?.code || '');
+  const responseCode = Number(error?.responseCode || 0);
+  const message = String(error?.message || '').toLowerCase();
+
+  if (code === 'ETIMEDOUT' || message.includes('connection timeout') || message.includes('greeting never received')) {
+    return 'SMTP connection timeout';
+  }
+
+  if (code === 'ESOCKET' && message.includes('timeout')) {
+    return 'SMTP socket timeout';
+  }
+
+  if (
+    code === 'EAUTH'
+    || responseCode === 535
+    || responseCode === 534
+    || message.includes('invalid login')
+    || message.includes('authentication unsuccessful')
+    || message.includes('bad credentials')
+    || message.includes('auth')
+  ) {
+    return 'Brevo auth failed';
+  }
+
+  if (
+    responseCode === 550
+    || responseCode === 553
+    || message.includes('sender')
+    || message.includes('not verified')
+    || message.includes('rejected')
+  ) {
+    return 'SMTP sender rejected';
+  }
+
+  return error?.message || 'Email delivery failed';
+};
+
 // Create transporter
 const createTransporter = () => {
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
     secure: false,
+    connectionTimeout: SMTP_CONNECTION_TIMEOUT,
+    greetingTimeout: SMTP_GREETING_TIMEOUT,
+    socketTimeout: SMTP_SOCKET_TIMEOUT,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
@@ -17,6 +62,7 @@ const createTransporter = () => {
 export const sendEmail = async ({ to, subject, text, html }) => {
   try {
     const transporter = createTransporter();
+    await transporter.verify();
     
     const info = await transporter.sendMail({
       from: process.env.EMAIL_FROM || 'ATHAND <noreply@athand.com>',
@@ -29,8 +75,16 @@ export const sendEmail = async ({ to, subject, text, html }) => {
     console.log(`Email sent: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Email error:', error);
-    return { success: false, error: error.message };
+    const classifiedError = classifyEmailError(error);
+    console.error('Email error:', {
+      message: error?.message,
+      code: error?.code,
+      response: error?.response,
+      responseCode: error?.responseCode,
+      command: error?.command,
+      classifiedError,
+    });
+    return { success: false, error: classifiedError };
   }
 };
 
