@@ -39,6 +39,14 @@ export const adminApi = {
   stats: () => apiRequest('/admin/stats'),
   users: () => apiRequest('/users'),
   bookings: () => apiRequest('/admin/bookings'),
+  providerSignupRequests: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest(`/admin/provider-signup-requests${query ? `?${query}` : ''}`);
+  },
+  approveProviderSignupRequest: (requestId, payload = {}) => apiRequest(`/admin/provider-signup-requests/${requestId}/approve`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }),
   chatConversations: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return apiRequest(`/admin/chats/conversations${query ? `?${query}` : ''}`);

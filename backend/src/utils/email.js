@@ -168,12 +168,34 @@ export const sendPasswordResetEmail = async (user, resetToken) => {
   });
 };
 
+export const sendProviderApprovalEmail = async ({ fullName, email }) => {
+  return sendEmail({
+    to: email,
+    subject: 'Your ATHAND provider request has been approved',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #0B1C2D;">Provider Request Approved</h1>
+        <p>Hi ${fullName},</p>
+        <p>Your request to join ATHAND as a service provider has been reviewed and approved.</p>
+        <p>You can now sign in and continue with your worker onboarding.</p>
+        <a href="${process.env.FRONTEND_URL}/login"
+           style="display: inline-block; background: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">
+          Sign In to ATHAND
+        </a>
+        <p style="margin-top: 32px; color: #666; font-size: 12px;">
+          © ${new Date().getFullYear()} ATHAND. All rights reserved.
+        </p>
+      </div>
+    `
+  });
+};
+
 export default {
   sendEmail,
   sendWelcomeEmail,
   sendBookingConfirmationEmail,
   sendPaymentReceiptEmail,
   sendWorkerVerificationEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendProviderApprovalEmail
 };
-

@@ -8,6 +8,8 @@ import Service from '../models/Service.js';
 import VerificationDocument from '../models/VerificationDocument.js';
 import WorkerService from '../models/WorkerService.js';
 import Message from '../models/Message.js';
+import ProviderSignupRequest from '../models/ProviderSignupRequest.js';
+import { sendProviderApprovalEmail } from '../utils/email.js';
 
 const router = express.Router();
 
@@ -86,6 +88,77 @@ router.put('/workers/:id/verify', async (req, res, next) => {
     await worker.save();
 
     res.json({ success: true, worker });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/provider-signup-requests', async (req, res, next) => {
+  try {
+    const { status = 'pending' } = req.query;
+    const query = status === 'all' ? {} : { status };
+    const requests = await ProviderSignupRequest.find(query)
+      .sort({ createdAt: 1 })
+      .populate('reviewedBy', 'fullName email');
+
+    res.json({ success: true, data: requests });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/provider-signup-requests/:id/approve', async (req, res, next) => {
+  try {
+    const { adminNotes = '' } = req.body;
+    const request = await ProviderSignupRequest.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Provider signup request not found' });
+    }
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({ message: 'This provider signup request has already been reviewed' });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ email: request.email }, { phone: request.phone }],
+    });
+    if (existingUser) {
+      return res.status(400).json({ message: 'A user already exists with this email or phone' });
+    }
+
+    const user = await User.create({
+      email: request.email,
+      passwordHash: request.passwordHash,
+      fullName: request.fullName,
+      phone: request.phone,
+      role: 'worker',
+      isEmailVerified: true,
+    });
+
+    const worker = await Worker.create({
+      userId: user._id,
+      onboardingCompleted: false,
+      verificationStatus: 'pending',
+    });
+
+    request.status = 'approved';
+    request.reviewedBy = req.user._id;
+    request.reviewedAt = new Date();
+    request.adminNotes = String(adminNotes || '').trim();
+    request.approvedUserId = user._id;
+    request.approvedWorkerId = worker._id;
+    await request.save();
+
+    await sendProviderApprovalEmail({ fullName: request.fullName, email: request.email });
+
+    res.json({
+      success: true,
+      message: 'Provider signup request approved and user created',
+      request,
+      user: user.toJSON(),
+      worker,
+    });
   } catch (error) {
     next(error);
   }

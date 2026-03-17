@@ -4,10 +4,12 @@ import { body, validationResult } from 'express-validator';
 import User from '../models/User.js';
 import Worker from '../models/Worker.js';
 import OtpCode from '../models/OtpCode.js';
+import ProviderSignupRequest from '../models/ProviderSignupRequest.js';
 import { authenticate } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { generateOtp, hashOtp, normalizeEmail, normalizePhone } from '../utils/otp.js';
 import { sendEmail } from '../utils/email.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -542,6 +544,60 @@ router.post('/register', [
       user: user.toJSON(),
       ...(worker && { worker }),
       requiresWorkerOnboarding: resolvedRole === 'worker',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/provider-signup-request', [
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 }),
+  body('fullName').trim().notEmpty(),
+  body('phone').trim().notEmpty(),
+  body('otpToken').notEmpty(),
+], async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password, fullName, otpToken } = req.body;
+    const phone = normalizePhone(req.body.phone);
+
+    validateOtpSessionToken({ token: otpToken, expectedPurpose: 'signup', email });
+
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }],
+    });
+    if (existingUser) {
+      throw new AppError('Email or phone already registered', 400);
+    }
+
+    const existingRequest = await ProviderSignupRequest.findOne({
+      $or: [{ email }, { phone }],
+      status: 'pending',
+    });
+    if (existingRequest) {
+      throw new AppError('A provider signup request is already pending for this email or phone', 400);
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const request = await ProviderSignupRequest.create({
+      fullName,
+      email,
+      phone,
+      passwordHash,
+      status: 'pending',
+    });
+
+    res.status(201).json({
+      success: true,
+      requestId: request._id,
+      message: 'Provider signup request submitted for admin review',
+      status: request.status,
     });
   } catch (error) {
     next(error);

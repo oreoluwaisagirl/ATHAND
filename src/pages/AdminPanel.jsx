@@ -36,6 +36,9 @@ const AdminPanel = () => {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [chatError, setChatError] = useState('');
   const [chatLastUpdatedAt, setChatLastUpdatedAt] = useState('');
+  const [providerRequests, setProviderRequests] = useState([]);
+  const [providerRequestsLoading, setProviderRequestsLoading] = useState(false);
+  const [providerRequestsError, setProviderRequestsError] = useState('');
 
   // New worker form state
   const [newWorker, setNewWorker] = useState({
@@ -148,6 +151,7 @@ const AdminPanel = () => {
   const verifiedWorkers = allWorkers.filter((worker) => worker.verified).length;
   const pendingWorkers = allWorkers.length - verifiedWorkers;
   const pendingBookings = bookings.filter((booking) => booking.status === 'pending').length;
+  const pendingProviderRequests = providerRequests.filter((request) => request.status === 'pending').length;
   const usersThisWeek = normalizedUsers.filter((u) => {
     if (!u.createdAt) return false;
     const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
@@ -155,6 +159,29 @@ const AdminPanel = () => {
   }).length;
 
   const selectedConversation = chatConversations.find((conversation) => conversation.roomId === selectedRoomId);
+
+  const loadProviderRequests = useCallback(async () => {
+    setProviderRequestsLoading(true);
+    setProviderRequestsError('');
+    try {
+      const response = await adminApi.providerSignupRequests({ status: 'all' });
+      setProviderRequests(Array.isArray(response?.data) ? response.data : []);
+    } catch (error) {
+      setProviderRequestsError(error?.message || 'Failed to load provider signup requests');
+    } finally {
+      setProviderRequestsLoading(false);
+    }
+  }, []);
+
+  const approveProviderRequest = useCallback(async (requestId) => {
+    try {
+      await adminApi.approveProviderSignupRequest(requestId);
+      await loadProviderRequests();
+      alert('Provider request approved. An approval email has been sent.');
+    } catch (error) {
+      alert(error?.message || 'Failed to approve provider request.');
+    }
+  }, [loadProviderRequests]);
 
   const loadChatConversations = useCallback(async ({ silent = false } = {}) => {
     if (!silent) setConversationsLoading(true);
@@ -211,6 +238,11 @@ const AdminPanel = () => {
     return () => clearInterval(timer);
   }, [activeTab, selectedRoomId, isAdmin, loadChatConversations, loadRoomMessages]);
 
+  useEffect(() => {
+    if (!isAdmin || activeTab !== 'workers') return;
+    loadProviderRequests();
+  }, [activeTab, isAdmin, loadProviderRequests]);
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
@@ -257,7 +289,7 @@ const AdminPanel = () => {
         <Card><CardContent className="p-3"><p className="text-xs text-text-tertiary">Workers</p><p className="text-xl font-semibold">{allWorkers.length}</p></CardContent></Card>
         <Card><CardContent className="p-3"><p className="text-xs text-text-tertiary">Verified</p><p className="text-xl font-semibold">{verifiedWorkers}</p><p className="text-xs text-text-tertiary">{pendingWorkers} pending</p></CardContent></Card>
         <Card><CardContent className="p-3"><p className="text-xs text-text-tertiary">Pending Bookings</p><p className="text-xl font-semibold">{pendingBookings}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-xs text-text-tertiary">New Users (7d)</p><p className="text-xl font-semibold">{usersThisWeek}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-xs text-text-tertiary">Provider Requests</p><p className="text-xl font-semibold">{pendingProviderRequests}</p><p className="text-xs text-text-tertiary">{usersThisWeek} users this week</p></CardContent></Card>
       </div>
       <div className="px-4 pb-2 text-xs text-text-tertiary">
         Backend sync: {syncStatus.backendConnected ? 'connected' : 'local fallback'}
@@ -296,6 +328,51 @@ const AdminPanel = () => {
       {/* Workers Tab */}
       {activeTab === 'workers' && (
         <div className="px-4 py-4">
+          <Card className="bg-container mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary">Provider Signup Requests</h3>
+                  <p className="text-sm text-text-secondary">Approve provider applications before worker accounts are created.</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={loadProviderRequests}>Refresh</Button>
+              </div>
+
+              {providerRequestsError ? <p className="text-sm text-error mb-3">{providerRequestsError}</p> : null}
+
+              {providerRequestsLoading ? (
+                <p className="text-sm text-text-secondary">Loading provider requests...</p>
+              ) : providerRequests.length === 0 ? (
+                <p className="text-sm text-text-secondary">No provider signup requests yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {providerRequests.map((request) => (
+                    <div key={request._id} className="rounded-xl border border-border bg-background p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-text-primary">{request.fullName}</p>
+                          <p className="text-sm text-text-secondary">{request.email}</p>
+                          <p className="text-sm text-text-tertiary">{request.phone}</p>
+                          <p className="text-xs text-text-tertiary mt-1">
+                            Requested {request.createdAt ? new Date(request.createdAt).toLocaleString() : 'Unknown'}
+                          </p>
+                        </div>
+                        <Badge variant={request.status === 'approved' ? 'success' : request.status === 'rejected' ? 'danger' : 'warning'} size="sm">
+                          {request.status}
+                        </Badge>
+                      </div>
+                      {request.status === 'pending' ? (
+                        <div className="mt-3">
+                          <Button size="sm" onClick={() => approveProviderRequest(request._id)}>Approve Request</Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Actions */}
           <div className="space-y-3 mb-4">
             <Button 

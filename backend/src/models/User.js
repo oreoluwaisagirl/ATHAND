@@ -59,6 +59,7 @@ userSchema.index({ createdAt: -1 });
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('passwordHash')) return next();
+  if (String(this.passwordHash || '').startsWith('$2')) return next();
   this.passwordHash = await bcrypt.hash(this.passwordHash, 12);
   next();
 });

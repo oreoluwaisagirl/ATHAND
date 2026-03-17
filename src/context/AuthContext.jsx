@@ -127,6 +127,10 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  const requestProviderSignup = async ({ fullName, email, phone, password, otpToken }) => {
+    return authApi.requestProviderSignup({ fullName, email, phone, password, otpToken });
+  };
+
   const completeWorkerOnboarding = async (payload) => {
     const response = await authApi.completeWorkerOnboarding(payload);
     return response;
@@ -155,6 +159,7 @@ export const AuthProvider = ({ children }) => {
     loginWithPhone,
     loginWithEmailOtp,
     register,
+    requestProviderSignup,
     completeWorkerOnboarding,
     passwordReset,
     requestOtp,
