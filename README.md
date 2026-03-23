@@ -39,6 +39,13 @@ PAYSTACK_SECRET_KEY=sk_live_or_test_key
 PAYSTACK_PUBLIC_KEY=pk_live_or_test_key
 ```
 
+`FRONTEND_URL` also supports a comma-separated list of allowed origins, for example:
+```env
+FRONTEND_URL=http://localhost:5173,http://192.168.1.20:4173,https://athand.app
+```
+
+In non-production, the backend also accepts localhost and LAN-IP origins automatically to simplify testing from a phone on the same network.
+
 Paystack keys are required because backend payment utilities call Paystack APIs directly in:
 - `backend/src/utils/paystack.js`
 - `backend/src/routes/payments.js`

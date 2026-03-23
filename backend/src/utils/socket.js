@@ -3,9 +3,26 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 export const initializeSocket = (server) => {
+  const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const localOriginPattern = /^https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|(?:\d{1,3}\.){3}\d{1,3})(?::\d+)?$/;
+
   const io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      origin(origin, callback) {
+        if (
+          !origin
+          || allowedOrigins.includes(origin)
+          || (process.env.NODE_ENV !== 'production' && localOriginPattern.test(origin))
+        ) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error(`Socket CORS blocked for origin: ${origin}`));
+      },
       methods: ['GET', 'POST'],
       credentials: true
     }
@@ -125,4 +142,3 @@ export const emitToUser = (io, userId, event, data) => {
 export const emitToRoom = (io, roomId, event, data) => {
   io.to(roomId).emit(event, data);
 };
-

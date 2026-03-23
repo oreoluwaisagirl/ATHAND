@@ -27,10 +27,20 @@ export const apiRequest = async (path, options = {}) => {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  let response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch (error) {
+    const isNetworkFailure = error instanceof TypeError;
+    if (isNetworkFailure) {
+      throw new Error(`Unable to reach the server. Check your connection and confirm ${API_BASE_URL} allows this site.`);
+    }
+    throw error;
+  }
 
   const contentType = response.headers.get('content-type') || '';
   const payload = contentType.includes('application/json')
