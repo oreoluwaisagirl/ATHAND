@@ -162,11 +162,12 @@ const BookingScreen = () => {
       }
 
       const paymentResponse = await paymentsApi.initialize({ bookingId: booking._id });
-      if (!paymentResponse?.authorizationUrl) {
+      const authorizationUrl = paymentResponse?.authorizationUrl || paymentResponse?.authorization_url;
+      if (!authorizationUrl) {
         throw new Error('Payment session was created without an authorization URL.');
       }
 
-      window.location.href = paymentResponse.authorizationUrl;
+      window.location.href = authorizationUrl;
     } catch (submitError) {
       setError(submitError?.message || 'Unable to create booking and start payment.');
     } finally {

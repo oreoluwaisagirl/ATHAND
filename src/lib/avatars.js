@@ -17,6 +17,15 @@ const palette = [
   ['#134E4A', '#0D9488'],
 ];
 
+const stockPortraits = [
+  '/images/workers/worker-01.svg',
+  '/images/workers/worker-02.svg',
+  '/images/workers/worker-03.svg',
+  '/images/workers/worker-04.svg',
+  '/images/workers/worker-05.svg',
+  '/images/workers/worker-06.svg',
+];
+
 const hashSeed = (seed = '') => {
   const normalized = String(seed || '').trim().toLowerCase();
   return [...normalized].reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -50,15 +59,23 @@ export const getAiAvatar = (seed = '') => {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 };
 
+const getStockPortrait = (seed = '') => {
+  const hash = hashSeed(seed);
+  return stockPortraits[hash % stockPortraits.length];
+};
+
 export const resolveAvatar = (preferredAvatar, seed, style = 'adventurer-neutral') => {
   if (preferredAvatar && !String(preferredAvatar).includes('/api/placeholder')) {
     if (String(preferredAvatar).includes('/uploads/seed/')) {
-      return getAiAvatar(seed, style);
+      return getStockPortrait(seed);
     }
     if (String(preferredAvatar).startsWith('/uploads/')) {
       return `${deriveApiOrigin()}${preferredAvatar}`;
     }
     return preferredAvatar;
+  }
+  if (String(preferredAvatar || '').includes('/api/placeholder')) {
+    return getStockPortrait(seed);
   }
   return getAiAvatar(seed, style);
 };

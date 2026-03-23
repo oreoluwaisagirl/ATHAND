@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-label="Worker portrait 05">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ddd6fe"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="40" fill="url(#bg)"/>
+  <circle cx="160" cy="119" r="62" fill="#eec4a8"/>
+  <path d="M100 119c0-43 27-72 60-72 35 0 61 30 61 73-15-14-34-21-60-21-25 0-46 8-61 20z" fill="#334155"/>
+  <path d="M86 278c14-49 43-80 74-80s60 31 74 80" fill="#ffffff" fill-opacity=".25"/>
+  <path d="M136 145c8 7 16 10 24 10s16-3 24-10" stroke="#8b5e3c" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <circle cx="138" cy="123" r="6" fill="#111827"/>
+  <circle cx="182" cy="123" r="6" fill="#111827"/>
+</svg>

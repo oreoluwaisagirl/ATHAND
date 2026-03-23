@@ -55,10 +55,20 @@ router.post('/initialize', authenticate, async (req, res, next) => {
     // Save payment reference to booking
     booking.paymentReference = reference;
     await booking.save();
+
+    const authorizationUrl =
+      response?.data?.authorization_url
+      || response?.data?.authorizationUrl
+      || response?.authorization_url
+      || response?.authorizationUrl;
+
+    if (!authorizationUrl) {
+      throw new AppError('Payment provider did not return an authorization URL', 502);
+    }
     
     res.json({
       success: true,
-      authorizationUrl: response.data.authorization_url,
+      authorizationUrl,
       reference
     });
   } catch (error) {
