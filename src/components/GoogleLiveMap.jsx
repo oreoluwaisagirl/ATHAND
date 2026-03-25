@@ -57,7 +57,7 @@ const GoogleLiveMap = ({ center, markers = [], height = 260, className = '' }) =
     return () => {
       cancelled = true;
     };
-  }, [apiKey, normalizedCenter.lat, normalizedCenter.lng]);
+  }, [apiKey, normalizedCenter]);
 
   useEffect(() => {
     if (!ready || !mapRef.current || !window.google?.maps) return;

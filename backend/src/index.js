@@ -106,6 +106,7 @@ app.use((req, res) => {
 
 // Database connection and server start
 const PORT = process.env.PORT || 5000;
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'ATHAND';
 
 const startServer = async () => {
   try {
@@ -113,8 +114,11 @@ const startServer = async () => {
     const mongoUri = process.env.MONGODB_URI;
     console.log('🔄 Connecting to MongoDB Atlas...');
     
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, {
+      dbName: MONGODB_DB_NAME,
+    });
     console.log('✅ Connected to MongoDB Atlas');
+    console.log(`🗄️ Using MongoDB database: ${MONGODB_DB_NAME}`);
 
     // Start server with HTTP server (for Socket.io)
     httpServer.listen(PORT, () => {

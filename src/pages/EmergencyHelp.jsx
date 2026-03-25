@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import Badge from '../components/Badge';
@@ -32,7 +32,7 @@ const EmergencyHelp = () => {
     [categories, category]
   );
 
-  const loadEmergencyWorkers = async () => {
+  const loadEmergencyWorkers = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -51,7 +51,7 @@ const EmergencyHelp = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location, category, userCoords?.lat, userCoords?.lng]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -59,9 +59,7 @@ const EmergencyHelp = () => {
         const response = await workersApi.emergencyCategories();
         const items = Array.isArray(response?.data) && response.data.length > 0 ? response.data : defaultCategories;
         setCategories(items);
-        if (!items.some((item) => item.id === category)) {
-          setCategory(items[0].id);
-        }
+        setCategory((current) => (items.some((item) => item.id === current) ? current : items[0].id));
       } catch {
         setCategories(defaultCategories);
       }
@@ -71,7 +69,7 @@ const EmergencyHelp = () => {
 
   useEffect(() => {
     loadEmergencyWorkers();
-  }, [location, category, userCoords?.lat, userCoords?.lng]);
+  }, [loadEmergencyWorkers]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
